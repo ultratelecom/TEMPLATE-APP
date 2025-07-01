@@ -66,6 +66,12 @@ export type RootStackParamList = {
   };
 };
 
+export type TabParamList = {
+  Chats: undefined;
+  Contacts: undefined;
+  Settings: undefined;
+};
+
 // Group-related types
 export interface GroupCreationData {
   groupPin: string;

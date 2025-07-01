@@ -14,6 +14,7 @@ import AddContactScreen from '../screens/AddContactScreen';
 import GroupCreationScreen from '../screens/GroupCreationScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import SignupScreen from '../screens/SignupScreen';
+import TabNavigator from './TabNavigator';
 
 const Stack = createStackNavigator<RootStackParamList>();
 
@@ -94,10 +95,9 @@ export default function AppNavigator() {
           />
           <Stack.Screen
             name="Home"
-            component={HomeScreen}
+            component={TabNavigator}
             options={{
-              title: 'OBLIVI0N',
-              headerLeft: () => null, // Disable back button
+              headerShown: false, // Hide header since tabs have their own headers
             }}
           />
           <Stack.Screen

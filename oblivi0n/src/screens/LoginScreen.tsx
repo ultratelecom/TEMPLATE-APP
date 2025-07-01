@@ -14,6 +14,8 @@ import { globalStyles, colors, spacing } from '../utils/theme';
 import { RootStackParamList } from '../types';
 import { SecureAuthManager } from '../utils/auth';
 import { OblivionMatrixClient } from '../utils/matrixClient';
+import AnimatedButton from '../components/AnimatedButton';
+import AnimatedContainer from '../components/AnimatedContainer';
 
 type LoginScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Login'>;
 
@@ -174,7 +176,11 @@ export default function LoginScreen({ navigation }: Props) {
           </View>
 
           {/* Login Form */}
-          <View style={{ width: '100%', maxWidth: 320, alignSelf: 'center' }}>
+          <AnimatedContainer 
+            variant="surface" 
+            style={{ width: '100%', maxWidth: 320, alignSelf: 'center' }}
+            delay={200}
+          >
             <Text style={[globalStyles.text, { marginBottom: spacing.sm }]}>
               Server PIN (4 digits)
             </Text>
@@ -218,22 +224,15 @@ export default function LoginScreen({ navigation }: Props) {
               editable={!isLoading}
             />
 
-            <TouchableOpacity
-              style={[
-                globalStyles.button,
-                { 
-                  marginTop: spacing.xl,
-                  backgroundColor: isLoading ? colors.buttonPressed : colors.button 
-                }
-              ]}
+            <AnimatedButton
+              title={isLoading ? 'CONNECTING...' : 'LOGIN'}
               onPress={handleLogin}
               disabled={isLoading}
-            >
-              <Text style={globalStyles.buttonText}>
-                {isLoading ? 'CONNECTING...' : 'LOGIN'}
-              </Text>
-            </TouchableOpacity>
-          </View>
+              style={{ marginTop: spacing.xl }}
+              variant="primary"
+              size="large"
+            />
+          </AnimatedContainer>
 
           {/* Signup Link */}
           <View style={{ marginTop: spacing.xl, alignItems: 'center' }}>

@@ -17,12 +17,134 @@ import { PinMappingService } from '../utils/pinMapping';
 import { SecureAuthManager } from '../utils/auth';
 import { NicknameService } from '../utils/nicknames';
 import { UserRegistrationService } from '../utils/userRegistration';
+import AnimatedButton from '../components/AnimatedButton';
+import AnimatedContainer from '../components/AnimatedContainer';
 
 type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Home'>;
 
 interface Props {
   navigation: HomeScreenNavigationProp;
 }
+
+// Separate component for chat thread items
+const ChatThreadItem = ({ item, navigation, onChatPress, index }: { 
+  item: ChatThread, 
+  navigation: HomeScreenNavigationProp,
+  onChatPress: (thread: ChatThread) => void,
+  index: number
+}) => {
+  const [displayName, setDisplayName] = useState(item.pin);
+  const [isOnline, setIsOnline] = useState(false);
+
+  useEffect(() => {
+    const loadDisplayData = async () => {
+      const userRegistrationService = UserRegistrationService.getInstance();
+      const name = await userRegistrationService.getDisplayNameByPin(item.pin);
+      setDisplayName(name);
+      
+      if (!item.isGroup) {
+        const online = await userRegistrationService.isUserOnline(item.pin);
+        setIsOnline(online);
+      }
+    };
+    
+    loadDisplayData();
+  }, [item.pin, item.isGroup]);
+
+  const handlePinPress = () => {
+    navigation.navigate('Profile', {
+      pin: item.pin,
+      isGroup: item.isGroup,
+    });
+  };
+
+  return (
+    <AnimatedContainer 
+      variant="message" 
+      style={{ marginBottom: spacing.sm }}
+      delay={index * 100}
+    >
+      <TouchableOpacity onPress={() => onChatPress(item)}>
+        <View style={[globalStyles.row, { justifyContent: 'space-between' }]}>
+          <View style={globalStyles.row}>
+            {/* Clickable PIN Badge with Online Indicator */}
+            <TouchableOpacity 
+              onPress={handlePinPress}
+              style={{ position: 'relative' }}
+            >
+              <View style={[
+                globalStyles.pinBadge,
+                item.isGroup && { backgroundColor: colors.button }
+              ]}>
+                <Text style={globalStyles.pinText}>{item.pin}</Text>
+              </View>
+              
+              {/* Online Status Indicator */}
+              {!item.isGroup && (
+                <View style={{
+                  position: 'absolute',
+                  top: -2,
+                  right: -2,
+                  width: 12,
+                  height: 12,
+                  borderRadius: 6,
+                  backgroundColor: isOnline ? '#00FF00' : '#666666',
+                  borderWidth: 1,
+                  borderColor: colors.background,
+                }} />
+              )}
+            </TouchableOpacity>
+            
+            <View style={{ marginLeft: spacing.md }}>
+              <View style={globalStyles.row}>
+                <Text style={globalStyles.text}>
+                  {item.isGroup ? `Group: ${item.pin}` : displayName}
+                </Text>
+                {item.isGroup && item.groupAlias && (
+                  <Text style={[globalStyles.textSecondary, { marginLeft: spacing.xs }]}>
+                    ({item.groupAlias})
+                  </Text>
+                )}
+                {item.isGroup && item.isAdmin && (
+                  <Text style={[globalStyles.textSecondary, { marginLeft: spacing.xs, fontSize: 10 }]}>
+                    • Admin
+                  </Text>
+                )}
+                {/* Online Status Text */}
+                {!item.isGroup && (
+                  <Text style={[globalStyles.textSecondary, { marginLeft: spacing.xs, fontSize: 10 }]}>
+                    • {isOnline ? 'Online' : 'Offline'}
+                  </Text>
+                )}
+              </View>
+              <Text style={[globalStyles.textSecondary, { marginTop: spacing.xs }]}>
+                {item.lastMessage}
+              </Text>
+              {item.isGroup && item.participantCount && (
+                <Text style={[globalStyles.textSecondary, { fontSize: 10, marginTop: spacing.xs }]}>
+                  {item.participantCount} participants
+                </Text>
+              )}
+            </View>
+          </View>
+          
+          <View style={{ alignItems: 'flex-end' }}>
+            <Text style={[globalStyles.textSecondary, { fontSize: 12 }]}>
+              {item.lastActivity.toLocaleDateString()}
+            </Text>
+            {item.unreadCount > 0 && (
+              <View style={[globalStyles.pinBadge, { marginTop: spacing.xs, minWidth: 20 }]}>
+                <Text style={[globalStyles.pinText, { fontSize: 10 }]}>
+                  {item.unreadCount}
+                </Text>
+              </View>
+            )}
+          </View>
+        </View>
+      </TouchableOpacity>
+    </AnimatedContainer>
+  );
+};
 
 export default function HomeScreen({ navigation }: Props) {
   const [chatThreads, setChatThreads] = useState<ChatThread[]>([]);
@@ -202,121 +324,14 @@ export default function HomeScreen({ navigation }: Props) {
     );
   };
 
-  const renderChatThread = ({ item }: { item: ChatThread }) => {
-    const nicknameService = NicknameService.getInstance();
-    const userRegistrationService = UserRegistrationService.getInstance();
-    const nickname = nicknameService.getNickname(item.pin);
-    
-    // Get the proper display name using UserRegistrationService
-    const getUserDisplayName = async () => {
-      return await userRegistrationService.getDisplayNameByPin(item.pin);
-    };
-    
-    // For now, use a synchronous approach with state
-    const [displayName, setDisplayName] = React.useState(item.pin);
-    
-    React.useEffect(() => {
-      getUserDisplayName().then(setDisplayName);
-    }, [item.pin]);
-    
-    // Simulate online status using UserRegistrationService
-    const [isOnline, setIsOnline] = React.useState(false);
-    
-    React.useEffect(() => {
-      if (!item.isGroup) {
-        userRegistrationService.isUserOnline(item.pin).then(setIsOnline);
-      }
-    }, [item.pin, item.isGroup]);
-    
-    const handlePinPress = () => {
-      navigation.navigate('Profile', {
-        pin: item.pin,
-        isGroup: item.isGroup,
-      });
-    };
-    
+  const renderChatThread = ({ item, index }: { item: ChatThread; index: number }) => {
     return (
-      <TouchableOpacity
-        style={[globalStyles.messageContainer, { marginBottom: spacing.sm }]}
-        onPress={() => handleChatPress(item)}
-      >
-        <View style={[globalStyles.row, { justifyContent: 'space-between' }]}>
-          <View style={globalStyles.row}>
-            {/* Clickable PIN Badge with Online Indicator */}
-            <TouchableOpacity 
-              onPress={handlePinPress}
-              style={{ position: 'relative' }}
-            >
-              <View style={[
-                globalStyles.pinBadge,
-                item.isGroup && { backgroundColor: colors.button }
-              ]}>
-                <Text style={globalStyles.pinText}>{item.pin}</Text>
-              </View>
-              
-              {/* Online Status Indicator */}
-              {!item.isGroup && (
-                <View style={{
-                  position: 'absolute',
-                  top: -2,
-                  right: -2,
-                  width: 12,
-                  height: 12,
-                  borderRadius: 6,
-                  backgroundColor: isOnline ? '#00FF00' : '#666666',
-                  borderWidth: 1,
-                  borderColor: colors.background,
-                }} />
-              )}
-            </TouchableOpacity>
-            
-            <View style={{ marginLeft: spacing.md }}>
-              <View style={globalStyles.row}>
-                <Text style={globalStyles.text}>
-                  {item.isGroup ? `Group: ${item.pin}` : displayName}
-                </Text>
-                {item.isGroup && item.groupAlias && (
-                  <Text style={[globalStyles.textSecondary, { marginLeft: spacing.xs }]}>
-                    ({item.groupAlias})
-                  </Text>
-                )}
-                {item.isGroup && item.isAdmin && (
-                  <Text style={[globalStyles.textSecondary, { marginLeft: spacing.xs, fontSize: 10 }]}>
-                    • Admin
-                  </Text>
-                )}
-                {/* Online Status Text */}
-                {!item.isGroup && (
-                  <Text style={[globalStyles.textSecondary, { marginLeft: spacing.xs, fontSize: 10 }]}>
-                    • {isOnline ? 'Online' : 'Offline'}
-                  </Text>
-                )}
-              </View>
-              <Text style={[globalStyles.textSecondary, { marginTop: spacing.xs }]}>
-                {item.lastMessage}
-              </Text>
-              {item.isGroup && item.participantCount && (
-                <Text style={[globalStyles.textSecondary, { fontSize: 10, marginTop: spacing.xs }]}>
-                  {item.participantCount} participants
-                </Text>
-              )}
-            </View>
-          </View>
-          
-          <View style={{ alignItems: 'flex-end' }}>
-            <Text style={[globalStyles.textSecondary, { fontSize: 12 }]}>
-              {item.lastActivity.toLocaleDateString()}
-            </Text>
-            {item.unreadCount > 0 && (
-              <View style={[globalStyles.pinBadge, { marginTop: spacing.xs, minWidth: 20 }]}>
-                <Text style={[globalStyles.pinText, { fontSize: 10 }]}>
-                  {item.unreadCount}
-                </Text>
-              </View>
-            )}
-          </View>
-        </View>
-      </TouchableOpacity>
+      <ChatThreadItem 
+        item={item} 
+        navigation={navigation} 
+        onChatPress={handleChatPress}
+        index={index}
+      />
     );
   };
 
@@ -337,29 +352,31 @@ export default function HomeScreen({ navigation }: Props) {
         <View style={{ padding: spacing.md }}>
           {/* Action Buttons Row */}
           <View style={[globalStyles.row, { marginBottom: spacing.md, gap: spacing.sm }]}>
-            <TouchableOpacity
-              style={[globalStyles.button, { flex: 1 }]}
+            <AnimatedButton
+              title="Add Contact"
               onPress={handleAddContact}
-            >
-              <Text style={globalStyles.buttonText}>Add Contact</Text>
-            </TouchableOpacity>
+              style={{ flex: 1 }}
+              variant="primary"
+              size="medium"
+            />
             
-            <TouchableOpacity
-              style={[globalStyles.button, { flex: 1 }]}
+            <AnimatedButton
+              title="Create Group"
               onPress={handleCreateGroup}
-            >
-              <Text style={globalStyles.buttonText}>Create Group</Text>
-            </TouchableOpacity>
+              style={{ flex: 1 }}
+              variant="secondary"
+              size="medium"
+            />
           </View>
           
           {/* Logout Button */}
           <View style={[globalStyles.row, { justifyContent: 'flex-end' }]}>
-            <TouchableOpacity
-              style={[globalStyles.button, { paddingHorizontal: spacing.lg }]}
+            <AnimatedButton
+              title="Logout"
               onPress={handleLogout}
-            >
-              <Text style={globalStyles.buttonText}>Logout</Text>
-            </TouchableOpacity>
+              variant="accent"
+              size="small"
+            />
           </View>
         </View>
 

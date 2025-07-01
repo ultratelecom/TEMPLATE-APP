@@ -12,6 +12,7 @@ import { globalStyles, colors, spacing, animations } from '../utils/theme';
 import { Message } from '../types';
 import { NicknameService } from '../utils/nicknames';
 import { UserRegistrationService } from '../utils/userRegistration';
+import { ReadReceiptService } from '../utils/readReceipts';
 
 interface BlurToRevealMessageProps {
   message: Message;
@@ -49,6 +50,7 @@ export default function BlurToRevealMessage({
   // Get display name and online status for sender
   const [displayName, setDisplayName] = useState(message.senderPin);
   const [isOnline, setIsOnline] = useState(false);
+  const [readCount, setReadCount] = useState(0);
   
   useEffect(() => {
     const loadSenderInfo = async () => {
@@ -64,6 +66,21 @@ export default function BlurToRevealMessage({
     
     loadSenderInfo();
   }, [message.senderPin]);
+
+  // Update read receipts
+  useEffect(() => {
+    const readReceiptService = ReadReceiptService.getInstance();
+    const count = readReceiptService.getReadCount(message.id, message.roomId);
+    setReadCount(count);
+    
+    // Poll for read receipt updates every 2 seconds
+    const interval = setInterval(() => {
+      const updatedCount = readReceiptService.getReadCount(message.id, message.roomId);
+      setReadCount(updatedCount);
+    }, 2000);
+    
+    return () => clearInterval(interval);
+  }, [message.id, message.roomId]);
   
   // Debug logging for message positioning
   console.log('[OBLIVI0N Message]', {
@@ -448,22 +465,41 @@ export default function BlurToRevealMessage({
         </Animated.View>
       </Animated.View>
 
-      {/* Timestamp below the bubble (like iMessage) */}
-      <Text style={[
-        globalStyles.textSecondary, 
-        { 
-          fontSize: 11, 
-          color: colors.textSecondary,
-          marginTop: 2,
-          textAlign: isOwnMessage ? 'right' : 'left',
-        }
-      ]}>
-        {message.timestamp.toLocaleTimeString([], { 
-          hour: '2-digit', 
-          minute: '2-digit',
-          hour12: false 
-        })}
-      </Text>
+      {/* Timestamp and read receipts below the bubble (like iMessage) */}
+      <View style={{
+        flexDirection: 'row',
+        justifyContent: isOwnMessage ? 'flex-end' : 'flex-start',
+        alignItems: 'center',
+        marginTop: 2,
+        gap: spacing.xs,
+      }}>
+        <Text style={[
+          globalStyles.textSecondary, 
+          { 
+            fontSize: 11, 
+            color: colors.textSecondary,
+          }
+        ]}>
+          {message.timestamp.toLocaleTimeString([], { 
+            hour: '2-digit', 
+            minute: '2-digit',
+            hour12: false 
+          })}
+        </Text>
+        
+        {/* Read receipts for own messages only */}
+        {isOwnMessage && readCount > 0 && (
+          <Text style={[
+            globalStyles.textSecondary,
+            {
+              fontSize: 10,
+              color: colors.textSecondary,
+            }
+          ]}>
+            👁️ {readCount}
+          </Text>
+        )}
+      </View>
     </View>
   );
 } 
