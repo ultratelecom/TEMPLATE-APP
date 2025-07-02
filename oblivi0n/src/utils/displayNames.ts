@@ -1,8 +1,8 @@
 import * as SecureStore from 'expo-secure-store';
 import { encryptData, decryptData, getRandomDisplayName } from './encryption';
 
-const DISPLAY_NAMES_KEY = 'oblivi0n_display_names';
-const USER_DISPLAY_NAME_KEY = 'oblivi0n_user_display_name';
+const DISPLAY_NAMES_KEY = 'wyspr_display_names';
+const USER_DISPLAY_NAME_KEY = 'wyspr_user_display_name';
 
 interface DisplayNameMap {
   [pin: string]: string; // PIN -> encrypted display name
@@ -24,9 +24,9 @@ export class DisplayNameService {
     try {
       await this.loadDisplayNames();
       await this.loadUserDisplayName();
-      console.log('[OBLIVI0N DisplayNames] Service initialized');
+      console.log('[WYSPR DisplayNames] Service initialized');
     } catch (error) {
-      console.error('[OBLIVI0N DisplayNames] Failed to initialize service:', error);
+      console.error('[WYSPR DisplayNames] Failed to initialize service:', error);
     }
   }
 
@@ -37,7 +37,7 @@ export class DisplayNameService {
         this.displayNames = JSON.parse(stored);
       }
     } catch (error) {
-      console.error('[OBLIVI0N DisplayNames] Failed to load display names:', error);
+      console.error('[WYSPR DisplayNames] Failed to load display names:', error);
       this.displayNames = {};
     }
   }
@@ -45,9 +45,9 @@ export class DisplayNameService {
   private async saveDisplayNames(): Promise<void> {
     try {
       await SecureStore.setItemAsync(DISPLAY_NAMES_KEY, JSON.stringify(this.displayNames));
-      console.log('[OBLIVI0N DisplayNames] Saved display names to storage');
+      console.log('[WYSPR DisplayNames] Saved display names to storage');
     } catch (error) {
-      console.error('[OBLIVI0N DisplayNames] Failed to save display names:', error);
+      console.error('[WYSPR DisplayNames] Failed to save display names:', error);
     }
   }
 
@@ -62,7 +62,7 @@ export class DisplayNameService {
         await this.setUserDisplayName(this.userDisplayName);
       }
     } catch (error) {
-      console.error('[OBLIVI0N DisplayNames] Failed to load user display name:', error);
+      console.error('[WYSPR DisplayNames] Failed to load user display name:', error);
       this.userDisplayName = getRandomDisplayName();
     }
   }
@@ -81,10 +81,10 @@ export class DisplayNameService {
       await SecureStore.setItemAsync(USER_DISPLAY_NAME_KEY, encrypted);
       this.userDisplayName = displayName.trim();
       
-      console.log('[OBLIVI0N DisplayNames] Updated user display name');
+      console.log('[WYSPR DisplayNames] Updated user display name');
       return { success: true };
     } catch (error) {
-      console.error('[OBLIVI0N DisplayNames] Failed to set user display name:', error);
+      console.error('[WYSPR DisplayNames] Failed to set user display name:', error);
       return { success: false, error: 'Failed to save display name' };
     }
   }
@@ -103,10 +103,10 @@ export class DisplayNameService {
       this.displayNames[pin] = encrypted;
       await this.saveDisplayNames();
       
-      console.log(`[OBLIVI0N DisplayNames] Set display name for PIN ${pin}`);
+      console.log(`[WYSPR DisplayNames] Set display name for PIN ${pin}`);
       return { success: true };
     } catch (error) {
-      console.error(`[OBLIVI0N DisplayNames] Failed to set display name for PIN ${pin}:`, error);
+      console.error(`[WYSPR DisplayNames] Failed to set display name for PIN ${pin}:`, error);
       return { success: false, error: 'Failed to save display name' };
     }
   }
@@ -119,7 +119,7 @@ export class DisplayNameService {
       }
       return await decryptData(encrypted);
     } catch (error) {
-      console.error(`[OBLIVI0N DisplayNames] Failed to get display name for PIN ${pin}:`, error);
+      console.error(`[WYSPR DisplayNames] Failed to get display name for PIN ${pin}:`, error);
       return null;
     }
   }
@@ -128,9 +128,9 @@ export class DisplayNameService {
     try {
       delete this.displayNames[pin];
       await this.saveDisplayNames();
-      console.log(`[OBLIVI0N DisplayNames] Removed display name for PIN ${pin}`);
+      console.log(`[WYSPR DisplayNames] Removed display name for PIN ${pin}`);
     } catch (error) {
-      console.error(`[OBLIVI0N DisplayNames] Failed to remove display name for PIN ${pin}:`, error);
+      console.error(`[WYSPR DisplayNames] Failed to remove display name for PIN ${pin}:`, error);
     }
   }
 
@@ -160,9 +160,9 @@ export class DisplayNameService {
     try {
       this.displayNames = {};
       await SecureStore.deleteItemAsync(DISPLAY_NAMES_KEY);
-      console.log('[OBLIVI0N DisplayNames] Cleared all display names');
+      console.log('[WYSPR DisplayNames] Cleared all display names');
     } catch (error) {
-      console.error('[OBLIVI0N DisplayNames] Failed to clear display names:', error);
+      console.error('[WYSPR DisplayNames] Failed to clear display names:', error);
     }
   }
 } 

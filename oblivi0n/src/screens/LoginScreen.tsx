@@ -13,7 +13,7 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { globalStyles, colors, spacing } from '../utils/theme';
 import { RootStackParamList } from '../types';
 import { SecureAuthManager } from '../utils/auth';
-import { OblivionMatrixClient } from '../utils/matrixClient';
+import { WysprMatrixClient } from '../utils/matrixClient';
 import AnimatedButton from '../components/AnimatedButton';
 import AnimatedContainer from '../components/AnimatedContainer';
 
@@ -36,23 +36,23 @@ export default function LoginScreen({ navigation }: Props) {
 
   const checkExistingSession = async () => {
     try {
-      console.log('[OBLIVI0N Login] Checking for existing session...');
+      console.log('[WYSPR Login] Checking for existing session...');
       
       const authManager = SecureAuthManager.getInstance();
       const result = await authManager.autoLogin();
       
       if (result.success) {
-        console.log('[OBLIVI0N Login] Auto-login successful');
+        console.log('[WYSPR Login] Auto-login successful');
         if (result.isTestMode) {
           // Show test mode indicator
-          console.log('[OBLIVI0N Login] Test mode session restored');
+          console.log('[WYSPR Login] Test mode session restored');
         }
         navigation.replace('Home');
       } else {
-        console.log('[OBLIVI0N Login] No valid session found:', result.error);
+        console.log('[WYSPR Login] No valid session found:', result.error);
       }
     } catch (error) {
-      console.error('[OBLIVI0N Login] Session check failed:', error);
+      console.error('[WYSPR Login] Session check failed:', error);
     }
   };
 
@@ -71,7 +71,7 @@ export default function LoginScreen({ navigation }: Props) {
       // Use legacy test mode login
       setIsLoading(true);
       try {
-        console.log('[OBLIVI0N Login] Test mode detected, using legacy auth...');
+        console.log('[WYSPR Login] Test mode detected, using legacy auth...');
         
         // Find which field has the test PIN
         let testPin = '';
@@ -79,10 +79,10 @@ export default function LoginScreen({ navigation }: Props) {
         else if (testPins.includes(userIdNumber)) testPin = userIdNumber;
         else if (testPins.includes(accessPin)) testPin = accessPin;
         
-        const result = await authManager.login('@test:matrix.oblivi0n.gov.local', testPin);
+        const result = await authManager.login('@test:matrix.wyspr.gov.local', testPin);
         
         if (result.success) {
-          console.log('[OBLIVI0N Login] Test mode login successful');
+          console.log('[WYSPR Login] Test mode login successful');
           
           if (result.isTestMode) {
             Alert.alert(
@@ -97,7 +97,7 @@ export default function LoginScreen({ navigation }: Props) {
           Alert.alert('Login Failed', result.error || 'Invalid test credentials');
         }
       } catch (error) {
-        console.error('[OBLIVI0N Login] Test mode login error:', error);
+        console.error('[WYSPR Login] Test mode login error:', error);
         Alert.alert('Login Failed', 'Test mode authentication failed');
       } finally {
         setIsLoading(false);
@@ -124,18 +124,18 @@ export default function LoginScreen({ navigation }: Props) {
     setIsLoading(true);
 
     try {
-      console.log('[OBLIVI0N Login] Attempting production login with PIN format...');
+      console.log('[WYSPR Login] Attempting production login with PIN format...');
       
       // Construct Matrix base URL and user ID
       const baseUrl = `https://matrix.${serverPin}.zero`;
       const userId = `@u${userIdNumber}:matrix.${serverPin}.zero`;
       
       // Try login with new PIN format (using matrixClient directly)
-      const matrixClient = OblivionMatrixClient.getInstance();
+      const matrixClient = WysprMatrixClient.getInstance();
       const result = await matrixClient.loginWithPinFormat(serverPin, userIdNumber, accessPin);
 
       if (result.success) {
-        console.log('[OBLIVI0N Login] Production login successful');
+        console.log('[WYSPR Login] Production login successful');
         
         // Save session data using auth manager
         const sessionData = {
@@ -151,7 +151,7 @@ export default function LoginScreen({ navigation }: Props) {
         Alert.alert('Login Failed', result.error || 'Invalid credentials');
       }
     } catch (error) {
-      console.error('[OBLIVI0N Login] Production login error:', error);
+      console.error('[WYSPR Login] Production login error:', error);
       Alert.alert('Login Failed', 'Unable to connect to server');
     } finally {
       setIsLoading(false);
@@ -168,7 +168,7 @@ export default function LoginScreen({ navigation }: Props) {
           {/* Header Section */}
           <View style={{ marginBottom: spacing.xxl, alignItems: 'center' }}>
             <Text style={[globalStyles.textMono, { fontSize: 32, textAlign: 'center' }]}>
-              OBLIVI0N
+              WYSPR
             </Text>
             <Text style={[globalStyles.textSecondary, { textAlign: 'center', marginTop: spacing.sm }]}>
               Secure Matrix Chat

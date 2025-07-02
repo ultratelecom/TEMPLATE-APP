@@ -86,7 +86,7 @@ export default function SplashScreen({ navigation }: Props) {
               }
             ]}
           >
-            OBLIVI0N
+            WYSPR
           </Animated.Text>
           
           <View style={{ minHeight: 120, justifyContent: 'flex-start' }}>

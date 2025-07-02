@@ -32,7 +32,7 @@ export default function SettingsScreen({ navigation }: Props) {
           style: 'destructive',
           onPress: async () => {
             try {
-              console.log('[OBLIVI0N Settings] Logging out...');
+              console.log('[WYSPR Settings] Logging out...');
               
               // Clear all ephemeral data
               const readReceiptService = ReadReceiptService.getInstance();
@@ -44,10 +44,10 @@ export default function SettingsScreen({ navigation }: Props) {
               const authManager = SecureAuthManager.getInstance();
               await authManager.logout();
               
-              console.log('[OBLIVI0N Settings] Logout complete, navigating to Login');
+              console.log('[WYSPR Settings] Logout complete, navigating to Login');
               navigation.replace('Login');
             } catch (error) {
-              console.error('[OBLIVI0N Settings] Logout failed:', error);
+              console.error('[WYSPR Settings] Logout failed:', error);
               Alert.alert('Logout Error', 'Failed to logout completely. Some data may remain.');
               // Still navigate to login even if logout partially failed
               navigation.replace('Login');
@@ -60,8 +60,8 @@ export default function SettingsScreen({ navigation }: Props) {
 
   const handleAbout = () => {
     Alert.alert(
-      'About OBLIVI0N',
-      'OBLIVI0N is a secure messaging app that uses end-to-end encryption and a 2-digit PIN system for maximum privacy.\n\nVersion: 1.0.0\nBuilt with React Native & Matrix Protocol',
+      'About WYSPR',
+      'WYSPR is a secure messaging app that uses end-to-end encryption and a 2-digit PIN system for maximum privacy.\n\nVersion: 1.0.0\nBuilt with React Native & Matrix Protocol',
       [{ text: 'OK' }]
     );
   };
@@ -69,7 +69,7 @@ export default function SettingsScreen({ navigation }: Props) {
   const handlePrivacy = () => {
     Alert.alert(
       'Privacy & Security',
-      'OBLIVI0N is designed with privacy-first principles:\n\n• End-to-end encryption for all messages\n• No message previews stored\n• 2-digit PIN system for anonymity\n• No personal data collection\n• Local data storage only',
+      'WYSPR is designed with privacy-first principles:\n\n• End-to-end encryption for all messages\n• No message previews stored\n• 2-digit PIN system for anonymity\n• No personal data collection\n• Local data storage only',
       [{ text: 'OK' }]
     );
   };
@@ -156,7 +156,7 @@ export default function SettingsScreen({ navigation }: Props) {
                 </View>
                 <View style={{ marginLeft: spacing.md, flex: 1 }}>
                   <Text style={[globalStyles.text, { fontSize: 16, fontWeight: '600' }]}>
-                    About OBLIVI0N
+                    About WYSPR
                   </Text>
                   <Text style={[globalStyles.textSecondary, { fontSize: 14, marginTop: spacing.xs }]}>
                     Version and app information
@@ -218,7 +218,7 @@ export default function SettingsScreen({ navigation }: Props) {
             alignItems: 'center',
           }}>
             <Text style={[globalStyles.text, { fontSize: 18, fontWeight: 'bold', marginBottom: spacing.sm }]}>
-              OBLIVI0N
+              WYSPR
             </Text>
             <Text style={[globalStyles.textSecondary, { fontSize: 12, textAlign: 'center', lineHeight: 16 }]}>
               Secure messaging with end-to-end encryption{'\n'}

@@ -32,7 +32,7 @@ export default function SignupScreen({ navigation }: Props) {
       setAvailablePin(pin);
       Alert.alert('PIN Generated', `Your assigned PIN is: ${pin}\n\nNow choose your permanent username.`);
     } catch (error) {
-      console.error('[OBLIVI0N Signup] Failed to generate PIN:', error);
+      console.error('[WYSPR Signup] Failed to generate PIN:', error);
       Alert.alert('Error', 'Failed to generate PIN. Please try again.');
     } finally {
       setIsLoading(false);
@@ -69,7 +69,7 @@ export default function SignupScreen({ navigation }: Props) {
       if (result.success) {
         Alert.alert(
           'Registration Successful!', 
-          `Welcome to OBLIVI0N!\n\nYour PIN: ${availablePin}\nYour Username: ${username.toLowerCase()}\n\nOthers will see you as "${availablePin} • ${username.toLowerCase()}"`,
+          `Welcome to WYSPR!\n\nYour PIN: ${availablePin}\nYour Username: ${username.toLowerCase()}\n\nOthers will see you as "${availablePin} • ${username.toLowerCase()}"`,
           [
             {
               text: 'Continue to Login',
@@ -81,7 +81,7 @@ export default function SignupScreen({ navigation }: Props) {
         Alert.alert('Registration Failed', result.error || 'Failed to register user');
       }
     } catch (error) {
-      console.error('[OBLIVI0N Signup] Registration failed:', error);
+      console.error('[WYSPR Signup] Registration failed:', error);
       Alert.alert('Error', 'Registration failed. Please try again.');
     } finally {
       setIsLoading(false);
@@ -95,7 +95,7 @@ export default function SignupScreen({ navigation }: Props) {
           {/* Header */}
           <View style={{ marginBottom: spacing.xxl, alignItems: 'center' }}>
             <Text style={[globalStyles.textMono, { fontSize: 32, textAlign: 'center' }]}>
-              OBLIVI0N
+              WYSPR
             </Text>
             <Text style={[globalStyles.textSecondary, { textAlign: 'center', marginTop: spacing.sm }]}>
               Secure Registration

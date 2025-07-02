@@ -18,7 +18,7 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
 import { globalStyles, colors, spacing } from '../utils/theme';
 import { RootStackParamList, Message } from '../types';
-import { OblivionMatrixClient } from '../utils/matrixClient';
+import { WysprMatrixClient } from '../utils/matrixClient';
 import { PinMappingService } from '../utils/pinMapping';
 import { NicknameService } from '../utils/nicknames';
 import { UserRegistrationService } from '../utils/userRegistration';
@@ -208,24 +208,24 @@ export default function ChatScreen({ navigation, route }: Props) {
   const loadMessages = async () => {
     try {
       setIsLoading(true);
-      const matrixClient = OblivionMatrixClient.getInstance();
+      const matrixClient = WysprMatrixClient.getInstance();
       
       // Get current user ID for message rendering
       const userId = await matrixClient.getCurrentUserId();
-      console.log('[OBLIVI0N Chat] Current user ID:', userId);
+      console.log('[WYSPR Chat] Current user ID:', userId);
       if (userId) {
         setCurrentUserId(userId);
-        console.log('[OBLIVI0N Chat] Set current user ID state:', userId);
+        console.log('[WYSPR Chat] Set current user ID state:', userId);
       } else {
-        console.warn('[OBLIVI0N Chat] No current user ID found');
+        console.warn('[WYSPR Chat] No current user ID found');
       }
       
       // Handle test mode
       if (matrixClient.isInTestMode()) {
-        console.log('[OBLIVI0N Chat] Loading test messages for room:', roomId);
+        console.log('[WYSPR Chat] Loading test messages for room:', roomId);
         const testMessages = matrixClient.getTestMessages(roomId);
         setMessages(testMessages);
-        console.log('[OBLIVI0N Chat] Loaded', testMessages.length, 'test messages');
+        console.log('[WYSPR Chat] Loaded', testMessages.length, 'test messages');
         return;
       }
       
@@ -261,18 +261,18 @@ export default function ChatScreen({ navigation, route }: Props) {
       setMessages(chatMessages);
       
     } catch (error) {
-      console.error('[OBLIVI0N Chat] Failed to load messages:', error);
+      console.error('[WYSPR Chat] Failed to load messages:', error);
     } finally {
       setIsLoading(false);
     }
   };
 
   const setupMessageListener = () => {
-    const matrixClient = OblivionMatrixClient.getInstance();
+    const matrixClient = WysprMatrixClient.getInstance();
     
     // Skip listeners in test mode
     if (matrixClient.isInTestMode()) {
-      console.log('[OBLIVI0N Chat] Test mode: Skipping message listeners');
+      console.log('[WYSPR Chat] Test mode: Skipping message listeners');
       return () => {}; // Return empty cleanup function
     }
     
@@ -302,17 +302,17 @@ export default function ChatScreen({ navigation, route }: Props) {
 
   const checkAdminStatus = async () => {
     try {
-      const matrixClient = OblivionMatrixClient.getInstance();
+      const matrixClient = WysprMatrixClient.getInstance();
       const admin = await matrixClient.isUserGroupAdmin(roomId);
       setIsGroupAdmin(admin);
-      console.log('[OBLIVI0N Chat] Group admin status:', admin);
+      console.log('[WYSPR Chat] Group admin status:', admin);
     } catch (error) {
-      console.error('[OBLIVI0N Chat] Failed to check admin status:', error);
+      console.error('[WYSPR Chat] Failed to check admin status:', error);
     }
   };
 
   const handleMessageDecrypt = (messageId: string) => {
-    console.log('[OBLIVI0N Chat] Message decrypted:', messageId);
+    console.log('[WYSPR Chat] Message decrypted:', messageId);
     
     // Mark message as read when decrypted
     if (currentUserId) {
@@ -322,7 +322,7 @@ export default function ChatScreen({ navigation, route }: Props) {
   };
 
   const handleMessageBlur = (messageId: string) => {
-    console.log('[OBLIVI0N Chat] Message blurred:', messageId);
+    console.log('[WYSPR Chat] Message blurred:', messageId);
     // No persistent state - messages auto-blur
   };
 
@@ -375,30 +375,30 @@ export default function ChatScreen({ navigation, route }: Props) {
     soundService.playSendSound().catch(console.error);
     
     try {
-      console.log('[OBLIVI0N Chat] Sending message to room:', roomId);
+      console.log('[WYSPR Chat] Sending message to room:', roomId);
       
       // Small delay to show the animation
       await new Promise(resolve => setTimeout(resolve, 300));
       
-      const matrixClient = OblivionMatrixClient.getInstance();
+      const matrixClient = WysprMatrixClient.getInstance();
       const result = await matrixClient.sendMessage(roomId, messageToSend);
       
       if (result.success) {
-        console.log('[OBLIVI0N Chat] Message sent successfully');
+        console.log('[WYSPR Chat] Message sent successfully');
         
         // Reload messages to show the sent message
         setTimeout(() => {
           loadMessages();
         }, 500);
       } else {
-        console.error('[OBLIVI0N Chat] Message send failed:', result.error);
+        console.error('[WYSPR Chat] Message send failed:', result.error);
         Alert.alert('Send Failed', result.error || 'Failed to send message');
         // Restore message text on failure
         setMessageText(messageToSend);
       }
       
     } catch (error) {
-      console.error('[OBLIVI0N Chat] Send message error:', error);
+      console.error('[WYSPR Chat] Send message error:', error);
       Alert.alert('Error', 'Network error. Please try again.');
       // Restore message text on error
       setMessageText(messageToSend);
@@ -422,7 +422,7 @@ export default function ChatScreen({ navigation, route }: Props) {
           text: 'Invite',
           onPress: async (pin) => {
             if (pin && /^\d{2}$/.test(pin)) {
-              const matrixClient = OblivionMatrixClient.getInstance();
+              const matrixClient = WysprMatrixClient.getInstance();
               const result = await matrixClient.inviteToGroup(roomId, pin);
               
               if (result.success) {
@@ -460,7 +460,7 @@ export default function ChatScreen({ navigation, route }: Props) {
                     text: 'Remove',
                     style: 'destructive',
                     onPress: async () => {
-                      const matrixClient = OblivionMatrixClient.getInstance();
+                      const matrixClient = WysprMatrixClient.getInstance();
                       const result = await matrixClient.removeFromGroup(roomId, pin);
                       
                       if (result.success) {
@@ -518,7 +518,7 @@ export default function ChatScreen({ navigation, route }: Props) {
   };
 
   const renderMessage = ({ item }: { item: Message }) => {
-    console.log('[OBLIVI0N Chat] Rendering message:', {
+    console.log('[WYSPR Chat] Rendering message:', {
       messageId: item.id,
       senderId: item.senderId,
       currentUserIdState: currentUserId,

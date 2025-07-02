@@ -1,6 +1,6 @@
 import { StyleSheet } from 'react-native';
 
-// Oblivi0n theme - strict black and white only
+// Wyspr theme - strict black and white only
 export const colors = {
   background: '#000000',
   surface: '#111111',
@@ -12,6 +12,8 @@ export const colors = {
   buttonPressed: '#333333',
   blur: '#666666',
   transparent: 'transparent',
+  error: '#444444',
+  success: '#333333',
 };
 
 export const spacing = {

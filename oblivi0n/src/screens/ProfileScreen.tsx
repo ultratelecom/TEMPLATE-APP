@@ -108,7 +108,7 @@ export default function ProfileScreen({ navigation, route }: Props) {
         setContactDisplayName(contactDisplayName || '');
       }
     } catch (error) {
-      console.error('[OBLIVI0N Profile] Failed to load display names:', error);
+      console.error('[WYSPR Profile] Failed to load display names:', error);
     }
   };
 
@@ -131,7 +131,7 @@ export default function ProfileScreen({ navigation, route }: Props) {
         Alert.alert('Error', result.error || 'Failed to save display name');
       }
     } catch (error) {
-      console.error('[OBLIVI0N Profile] Failed to save user display name:', error);
+      console.error('[WYSPR Profile] Failed to save user display name:', error);
       Alert.alert('Error', 'Failed to save display name');
     }
   };
@@ -148,7 +148,7 @@ export default function ProfileScreen({ navigation, route }: Props) {
         Alert.alert('Error', result.error || 'Failed to save display name');
       }
     } catch (error) {
-      console.error('[OBLIVI0N Profile] Failed to save contact display name:', error);
+      console.error('[WYSPR Profile] Failed to save contact display name:', error);
       Alert.alert('Error', 'Failed to save display name');
     }
   };

@@ -83,7 +83,7 @@ export default function BlurToRevealMessage({
   }, [message.id, message.roomId]);
   
   // Debug logging for message positioning
-  console.log('[OBLIVI0N Message]', {
+  console.log('[WYSPR Message]', {
     messageId: message.id,
     senderId: message.senderId,
     currentUserId: currentUserId,
@@ -147,7 +147,7 @@ export default function BlurToRevealMessage({
 
   // Handle message reveal with buttery smooth Confide-style animation
   const handleReveal = () => {
-    console.log('[OBLIVI0N Message] Revealing message:', message.id);
+    console.log('[WYSPR Message] Revealing message:', message.id);
     
     setIsPressed(true);
     
@@ -199,7 +199,7 @@ export default function BlurToRevealMessage({
 
   // Handle message blur
   const handleBlur = () => {
-    console.log('[OBLIVI0N Message] Blurring message:', message.id);
+    console.log('[WYSPR Message] Blurring message:', message.id);
     
     setIsRevealed(false);
     setIsPressed(false);

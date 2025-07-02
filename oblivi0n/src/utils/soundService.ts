@@ -53,9 +53,9 @@ export class SoundService {
       this.receiveSound = receiveSound;
 
       this.isInitialized = true;
-      console.log('[OBLIVI0N Sound] Service initialized');
+      console.log('[WYSPR Sound] Service initialized');
     } catch (error) {
-      console.error('[OBLIVI0N Sound] Failed to initialize:', error);
+      console.error('[WYSPR Sound] Failed to initialize:', error);
     }
   }
 
@@ -67,10 +67,10 @@ export class SoundService {
 
       if (this.sendSound) {
         await this.sendSound.replayAsync();
-        console.log('[OBLIVI0N Sound] Send sound played');
+        console.log('[WYSPR Sound] Send sound played');
       }
     } catch (error) {
-      console.error('[OBLIVI0N Sound] Failed to play send sound:', error);
+      console.error('[WYSPR Sound] Failed to play send sound:', error);
     }
   }
 
@@ -82,10 +82,10 @@ export class SoundService {
 
       if (this.receiveSound) {
         await this.receiveSound.replayAsync();
-        console.log('[OBLIVI0N Sound] Receive sound played');
+        console.log('[WYSPR Sound] Receive sound played');
       }
     } catch (error) {
-      console.error('[OBLIVI0N Sound] Failed to play receive sound:', error);
+      console.error('[WYSPR Sound] Failed to play receive sound:', error);
     }
   }
 
@@ -217,9 +217,9 @@ export class SoundService {
         this.receiveSound = null;
       }
       this.isInitialized = false;
-      console.log('[OBLIVI0N Sound] Service cleaned up');
+      console.log('[WYSPR Sound] Service cleaned up');
     } catch (error) {
-      console.error('[OBLIVI0N Sound] Cleanup error:', error);
+      console.error('[WYSPR Sound] Cleanup error:', error);
     }
   }
 } 

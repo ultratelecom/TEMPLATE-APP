@@ -11,9 +11,10 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { useFocusEffect } from '@react-navigation/native';
 import { globalStyles, colors, spacing } from '../utils/theme';
 import { RootStackParamList, ChatThread } from '../types';
-import { OblivionMatrixClient } from '../utils/matrixClient';
+import { WysprMatrixClient } from '../utils/matrixClient';
 import { PinMappingService } from '../utils/pinMapping';
 import { UserRegistrationService } from '../utils/userRegistration';
+import FloatingContactRequests from '../components/FloatingContactRequests';
 
 type ChatsScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Home'>;
 
@@ -152,12 +153,12 @@ export default function ChatsScreen({ navigation }: Props) {
   const loadChatThreads = async () => {
     try {
       setIsLoading(true);
-      const matrixClient = OblivionMatrixClient.getInstance();
+      const matrixClient = WysprMatrixClient.getInstance();
       const pinService = PinMappingService.getInstance();
       
       // Handle test mode
       if (matrixClient.isInTestMode()) {
-        console.log('[OBLIVI0N Chats] Loading test chat threads');
+        console.log('[WYSPR Chats] Loading test chat threads');
         
         const testThreads: ChatThread[] = [
           // Direct messages - NO MESSAGE PREVIEWS FOR SECURITY
@@ -200,7 +201,7 @@ export default function ChatsScreen({ navigation }: Props) {
         ];
         
         setChatThreads(testThreads);
-        console.log('[OBLIVI0N Chats] Loaded', testThreads.length, 'test chat threads');
+        console.log('[WYSPR Chats] Loaded', testThreads.length, 'test chat threads');
         return;
       }
       
@@ -257,7 +258,7 @@ export default function ChatsScreen({ navigation }: Props) {
       threads.sort((a, b) => b.lastActivity.getTime() - a.lastActivity.getTime());
       setChatThreads(threads);
     } catch (error) {
-      console.error('[OBLIVI0N Chats] Failed to load chat threads:', error);
+      console.error('[WYSPR Chats] Failed to load chat threads:', error);
     } finally {
       setIsLoading(false);
       setRefreshing(false);
@@ -299,6 +300,12 @@ export default function ChatsScreen({ navigation }: Props) {
     </View>
   );
 
+  const handleContactRequestsUpdated = () => {
+    // Optional: Refresh the chat list when contact requests are updated
+    // This could add new chats to the list
+    loadChatThreads();
+  };
+
   return (
     <SafeAreaView style={globalStyles.safeArea}>
       <View style={globalStyles.container}>
@@ -309,6 +316,7 @@ export default function ChatsScreen({ navigation }: Props) {
           contentContainerStyle={{ 
             padding: spacing.md,
             flexGrow: 1,
+            paddingBottom: spacing.xxl, // Extra padding for floating cards
           }}
           ListEmptyComponent={renderEmptyState}
           refreshControl={
@@ -321,6 +329,9 @@ export default function ChatsScreen({ navigation }: Props) {
           }
           showsVerticalScrollIndicator={false}
         />
+        
+        {/* Floating Contact Request Cards */}
+        <FloatingContactRequests onRequestsUpdated={handleContactRequestsUpdated} />
       </View>
     </SafeAreaView>
   );

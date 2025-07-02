@@ -1,13 +1,37 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { View, Text } from 'react-native';
 import { colors } from '../utils/theme';
 import ChatsScreen from '../screens/ChatsScreen';
 import ContactsScreen from '../screens/ContactsScreen';
 import SettingsScreen from '../screens/SettingsScreen';
+import { ContactRequestService } from '../utils/contactRequests';
+import { useFocusEffect } from '@react-navigation/native';
 
 const Tab = createBottomTabNavigator();
 
 export default function TabNavigator() {
+  const [pendingRequestsCount, setPendingRequestsCount] = useState(0);
+
+  const loadPendingRequests = async () => {
+    try {
+      const contactService = ContactRequestService.getInstance();
+      const requests = await contactService.getPendingRequests();
+      setPendingRequestsCount(requests.length);
+    } catch (error) {
+      console.error('Failed to load pending requests for badge:', error);
+    }
+  };
+
+  useFocusEffect(
+    React.useCallback(() => {
+      loadPendingRequests();
+      // Set up interval to check for new requests
+      const interval = setInterval(loadPendingRequests, 5000); // Check every 5 seconds
+      return () => clearInterval(interval);
+    }, [])
+  );
+
   return (
     <Tab.Navigator
       screenOptions={{
@@ -43,7 +67,7 @@ export default function TabNavigator() {
         name="Chats"
         component={ChatsScreen}
         options={{
-          title: 'OBLIVI0N',
+          title: 'WYSPR',
           tabBarLabel: 'Chats',
           tabBarIcon: ({ color, size }) => (
             <TabIcon icon="💬" color={color} size={size} />
@@ -57,7 +81,12 @@ export default function TabNavigator() {
           title: 'Contacts',
           tabBarLabel: 'Contacts',
           tabBarIcon: ({ color, size }) => (
-            <TabIcon icon="👥" color={color} size={size} />
+            <TabIconWithBadge 
+              icon="👥" 
+              color={color} 
+              size={size} 
+              badgeCount={pendingRequestsCount}
+            />
           ),
         }}
       />
@@ -78,10 +107,48 @@ export default function TabNavigator() {
 
 // Simple tab icon component
 const TabIcon = ({ icon, color, size }: { icon: string; color: string; size: number }) => {
-  const { Text } = require('react-native');
   return (
     <Text style={{ fontSize: size - 4, color, textAlign: 'center' }}>
       {icon}
     </Text>
+  );
+};
+
+// Tab icon with badge component
+const TabIconWithBadge = ({ icon, color, size, badgeCount }: { 
+  icon: string; 
+  color: string; 
+  size: number; 
+  badgeCount: number;
+}) => {
+  return (
+    <View style={{ position: 'relative' }}>
+      <Text style={{ fontSize: size - 4, color, textAlign: 'center' }}>
+        {icon}
+      </Text>
+      {badgeCount > 0 && (
+        <View style={{
+          position: 'absolute',
+          top: -8,
+          right: -8,
+          backgroundColor: '#EF4444',
+          borderRadius: 10,
+          minWidth: 20,
+          height: 20,
+          justifyContent: 'center',
+          alignItems: 'center',
+          borderWidth: 2,
+          borderColor: colors.background,
+        }}>
+          <Text style={{
+            color: colors.text,
+            fontSize: 12,
+            fontWeight: 'bold',
+          }}>
+            {badgeCount > 99 ? '99+' : badgeCount}
+          </Text>
+        </View>
+      )}
+    </View>
   );
 }; 

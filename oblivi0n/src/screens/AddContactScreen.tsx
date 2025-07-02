@@ -12,7 +12,7 @@ import {
 import { StackNavigationProp } from '@react-navigation/stack';
 import { globalStyles, colors, spacing } from '../utils/theme';
 import { RootStackParamList } from '../types';
-import { OblivionMatrixClient } from '../utils/matrixClient';
+import { ContactRequestService } from '../utils/contactRequests';
 import { PinMappingService } from '../utils/pinMapping';
 
 type AddContactScreenNavigationProp = StackNavigationProp<RootStackParamList, 'AddContact'>;
@@ -22,76 +22,74 @@ interface Props {
 }
 
 export default function AddContactScreen({ navigation }: Props) {
-  const [pin, setPin] = useState('');
-  const [matrixUserId, setMatrixUserId] = useState('');
+  const [targetPin, setTargetPin] = useState('');
+  const [message, setMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleAddContact = async () => {
-    if (!pin.trim() || !matrixUserId.trim()) {
-      Alert.alert('Error', 'Please enter both PIN and Matrix User ID');
+  const handleSendContactRequest = async () => {
+    if (!targetPin.trim()) {
+      Alert.alert('Error', 'Please enter the PIN you want to add');
       return;
     }
 
-    if (!/^\d{2}$/.test(pin)) {
+    if (!/^\d{2}$/.test(targetPin)) {
       Alert.alert('Error', 'PIN must be exactly 2 digits');
-      return;
-    }
-
-    if (!matrixUserId.startsWith('@') || !matrixUserId.includes(':')) {
-      Alert.alert('Error', 'Matrix User ID must be in format @username:domain.com');
       return;
     }
 
     setIsLoading(true);
 
     try {
+      const contactService = ContactRequestService.getInstance();
       const pinService = PinMappingService.getInstance();
-      const matrixClient = OblivionMatrixClient.getInstance();
-
-      // Check if PIN is already taken
-      const existingUserId = pinService.getMatrixUserId(pin);
-      if (existingUserId) {
-        Alert.alert('Error', `PIN ${pin} is already assigned to another contact`);
-        setIsLoading(false);
-        return;
-      }
-
-      // Check if Matrix User ID is already mapped
-      const existingPin = pinService.getPin(matrixUserId);
-      if (existingPin) {
-        Alert.alert('Error', `This Matrix user already has PIN ${existingPin}`);
-        setIsLoading(false);
-        return;
-      }
-
-      // Create direct message room with the user
-      const roomId = await matrixClient.createDirectMessageRoom(matrixUserId);
       
-      if (!roomId) {
-        Alert.alert('Error', 'Failed to create chat room. User may not exist or has blocked invites.');
+      // Check if PIN is already in contacts
+      const existingUserId = pinService.getMatrixUserId(targetPin);
+      if (existingUserId) {
+        Alert.alert('Already Connected', `PIN ${targetPin} is already in your contacts`);
         setIsLoading(false);
         return;
       }
 
-      // Add the PIN mapping
-      const success = await pinService.addMapping(pin, matrixUserId);
+      // Get current user's PIN (from test mode configuration)
+      const { WysprMatrixClient } = require('../utils/matrixClient');
+      const matrixClient = WysprMatrixClient.getInstance();
+      const currentUserId = await matrixClient.getCurrentUserId();
+      
+      // Map userId to PIN for test mode
+      const TEST_PINS = {
+        '@u32:193.135.116.56': '10', // PIN 10
+        '@u17:193.135.116.56': '11', // PIN 11
+      };
+      
+      const currentPin = TEST_PINS[currentUserId as keyof typeof TEST_PINS];
+      
+      if (!currentPin) {
+        Alert.alert('Error', 'Could not determine your PIN. Please restart the app.');
+        setIsLoading(false);
+        return;
+      }
+      
+      if (targetPin === currentPin) {
+        Alert.alert('Error', 'You cannot add yourself as a contact');
+        setIsLoading(false);
+        return;
+      }
+
+      // Send contact request
+      const success = await contactService.sendContactRequest(
+        currentPin,
+        targetPin,
+        message.trim() || undefined
+      );
       
       if (success) {
         Alert.alert(
-          'Contact Added',
-          `Contact ${pin} added successfully`,
+          'Contact Request Sent',
+          `Contact request sent to PIN ${targetPin}. They will receive a notification and can accept or decline.`,
           [
             {
-              text: 'Start Chat',
-              onPress: () => {
-                navigation.replace('Chat', {
-                  roomId,
-                  pin,
-                });
-              },
-            },
-            {
-              text: 'Go to Home',
+              text: 'OK',
               onPress: () => {
                 navigation.goBack();
               },
@@ -99,11 +97,11 @@ export default function AddContactScreen({ navigation }: Props) {
           ]
         );
       } else {
-        Alert.alert('Error', 'Failed to save contact mapping');
+        Alert.alert('Error', `Failed to send contact request. PIN ${targetPin} may not exist or be offline.`);
       }
     } catch (error) {
-      console.error('Add contact error:', error);
-      Alert.alert('Error', 'Failed to add contact. Please check the Matrix User ID.');
+      console.error('Send contact request error:', error);
+      Alert.alert('Error', 'Failed to send contact request. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -114,7 +112,7 @@ export default function AddContactScreen({ navigation }: Props) {
     const availablePin = pinService.generateAvailablePin();
     
     if (availablePin) {
-      setPin(availablePin);
+      setTargetPin(availablePin);
     } else {
       Alert.alert('Error', 'All PINs are currently in use');
     }
@@ -129,31 +127,31 @@ export default function AddContactScreen({ navigation }: Props) {
         <View style={globalStyles.screen}>
           <View style={{ marginBottom: spacing.xl }}>
             <Text style={[globalStyles.text, { fontSize: 20, textAlign: 'center' }]}>
-              Add New Contact
+              Add Contact by PIN
             </Text>
             <Text style={[globalStyles.textSecondary, { textAlign: 'center', marginTop: spacing.sm }]}>
-              Assign a 2-digit PIN to a Matrix user for anonymous chatting
+              Send a contact request to another user's 2-digit PIN
             </Text>
           </View>
 
           <View style={{ marginBottom: spacing.lg }}>
             <View style={[globalStyles.row, { justifyContent: 'space-between', alignItems: 'flex-end' }]}>
               <Text style={[globalStyles.text, { marginBottom: spacing.sm }]}>
-                2-Digit PIN
+                Target PIN
               </Text>
               <TouchableOpacity
                 style={[globalStyles.button, { paddingVertical: spacing.xs, paddingHorizontal: spacing.sm }]}
                 onPress={generateRandomPin}
               >
                 <Text style={[globalStyles.buttonText, { fontSize: 12 }]}>
-                  Generate
+                  Random
                 </Text>
               </TouchableOpacity>
             </View>
             <TextInput
               style={globalStyles.input}
-              value={pin}
-              onChangeText={setPin}
+              value={targetPin}
+              onChangeText={setTargetPin}
               placeholder="XX"
               placeholderTextColor={colors.textSecondary}
               keyboardType="numeric"
@@ -161,26 +159,26 @@ export default function AddContactScreen({ navigation }: Props) {
               editable={!isLoading}
             />
             <Text style={[globalStyles.textSecondary, { fontSize: 11, marginTop: spacing.xs }]}>
-              Must be exactly 2 digits (10-99)
+              The PIN of the person you want to add as a contact
             </Text>
           </View>
 
           <View style={{ marginBottom: spacing.xl }}>
             <Text style={[globalStyles.text, { marginBottom: spacing.sm }]}>
-              Matrix User ID
+              Optional Message
             </Text>
             <TextInput
-              style={globalStyles.input}
-              value={matrixUserId}
-              onChangeText={setMatrixUserId}
-              placeholder="@username:your-matrix-domain.com"
+              style={[globalStyles.input, { height: 80 }]}
+              value={message}
+              onChangeText={setMessage}
+              placeholder="Would like to add you as a contact"
               placeholderTextColor={colors.textSecondary}
-              autoCapitalize="none"
-              autoCorrect={false}
+              multiline
+              textAlignVertical="top"
               editable={!isLoading}
             />
             <Text style={[globalStyles.textSecondary, { fontSize: 11, marginTop: spacing.xs }]}>
-              The Matrix ID of the person you want to add
+              Optional message to include with your contact request
             </Text>
           </View>
 
@@ -192,20 +190,20 @@ export default function AddContactScreen({ navigation }: Props) {
                 marginBottom: spacing.lg,
               }
             ]}
-            onPress={handleAddContact}
+            onPress={handleSendContactRequest}
             disabled={isLoading}
           >
             <Text style={globalStyles.buttonText}>
-              {isLoading ? 'ADDING CONTACT...' : 'ADD CONTACT'}
+              {isLoading ? 'SENDING REQUEST...' : 'SEND CONTACT REQUEST'}
             </Text>
           </TouchableOpacity>
 
           <View style={[globalStyles.messageContainer, { backgroundColor: colors.surface }]}>
             <Text style={[globalStyles.textSecondary, { fontSize: 12 }]}>
-              <Text style={{ color: colors.text }}>Security Note:</Text> {'\n'}
-              • PINs replace usernames for anonymity{'\n'}
-              • Only you will see this PIN mapping{'\n'}
-              • The other person won't see your PIN{'\n'}
+              <Text style={{ color: colors.text }}>How it works:</Text> {'\n'}
+              • Enter the 2-digit PIN of someone you want to chat with{'\n'}
+              • They'll receive your contact request and can accept/decline{'\n'}
+              • Once accepted, you can chat anonymously using PINs{'\n'}
               • All messages are end-to-end encrypted
             </Text>
           </View>

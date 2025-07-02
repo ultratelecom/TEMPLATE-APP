@@ -12,7 +12,7 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { useFocusEffect } from '@react-navigation/native';
 import { globalStyles, colors, spacing } from '../utils/theme';
 import { RootStackParamList, ChatThread } from '../types';
-import { OblivionMatrixClient } from '../utils/matrixClient';
+import { WysprMatrixClient } from '../utils/matrixClient';
 import { PinMappingService } from '../utils/pinMapping';
 import { SecureAuthManager } from '../utils/auth';
 import { NicknameService } from '../utils/nicknames';
@@ -160,12 +160,12 @@ export default function HomeScreen({ navigation }: Props) {
   const loadChatThreads = async () => {
     try {
       setIsLoading(true);
-      const matrixClient = OblivionMatrixClient.getInstance();
+      const matrixClient = WysprMatrixClient.getInstance();
       const pinService = PinMappingService.getInstance();
       
               // Handle test mode
         if (matrixClient.isInTestMode()) {
-          console.log('[OBLIVI0N Home] Loading test chat threads');
+          console.log('[WYSPR Home] Loading test chat threads');
           
           const testThreads: ChatThread[] = [
             // Direct messages
@@ -208,7 +208,7 @@ export default function HomeScreen({ navigation }: Props) {
           ];
           
           setChatThreads(testThreads);
-          console.log('[OBLIVI0N Home] Loaded', testThreads.length, 'test chat threads');
+          console.log('[WYSPR Home] Loaded', testThreads.length, 'test chat threads');
           return;
         }
       
@@ -265,7 +265,7 @@ export default function HomeScreen({ navigation }: Props) {
       threads.sort((a, b) => b.lastActivity.getTime() - a.lastActivity.getTime());
       setChatThreads(threads);
     } catch (error) {
-      console.error('[OBLIVI0N Home] Failed to load chat threads:', error);
+      console.error('[WYSPR Home] Failed to load chat threads:', error);
     } finally {
       setIsLoading(false);
       setRefreshing(false);
@@ -305,15 +305,15 @@ export default function HomeScreen({ navigation }: Props) {
           style: 'destructive',
           onPress: async () => {
             try {
-              console.log('[OBLIVI0N Home] Logging out...');
+              console.log('[WYSPR Home] Logging out...');
               
               const authManager = SecureAuthManager.getInstance();
               await authManager.logout();
               
-              console.log('[OBLIVI0N Home] Logout complete, navigating to Login');
+              console.log('[WYSPR Home] Logout complete, navigating to Login');
               navigation.replace('Login');
             } catch (error) {
-              console.error('[OBLIVI0N Home] Logout failed:', error);
+              console.error('[WYSPR Home] Logout failed:', error);
               Alert.alert('Logout Error', 'Failed to logout completely. Some data may remain.');
               // Still navigate to login even if logout partially failed
               navigation.replace('Login');

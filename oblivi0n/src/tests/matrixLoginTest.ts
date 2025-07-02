@@ -6,13 +6,13 @@ const HOMESERVER_URL = 'https://193.135.116.56';
 const USER1 = {
   userId: '@u32:193.135.116.56',
   password: 'ultra12!',
-  deviceId: 'oblivi0n-device-u32'
+  deviceId: 'wyspr-device-u32'
 };
 
 const USER2 = {
   userId: '@u17:193.135.116.56', 
   password: 'ultra12!',
-  deviceId: 'oblivi0n-device-u17'
+  deviceId: 'wyspr-device-u17'
 };
 
 export async function runMatrixTest(): Promise<void> {
@@ -89,7 +89,7 @@ export async function runMatrixTest(): Promise<void> {
     // Create room from User 1
     console.log('\n🏠 Creating room from User 1...');
     const roomResponse = await client1.createRoom({
-      name: 'OBLIVI0N Test Room',
+      name: 'WYSPR Test Room',
       topic: 'Test room for Matrix connectivity',
       visibility: 'private' as any,
       preset: 'private_chat' as any,
@@ -133,7 +133,7 @@ export async function runMatrixTest(): Promise<void> {
     console.log('\n💬 Sending message from User 1...');
     const messageContent = {
       msgtype: 'm.text',
-      body: 'Hello from OBLIVI0N! This is a test message from User 32 to User 17.',
+      body: 'Hello from WYSPR! This is a test message from User 32 to User 17.',
     };
 
     const sendResponse = await client1.sendEvent(roomId, 'm.room.message' as any, messageContent);

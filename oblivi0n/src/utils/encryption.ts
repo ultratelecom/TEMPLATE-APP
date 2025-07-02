@@ -1,7 +1,7 @@
 import { Alert } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
 
-const ENCRYPTION_KEY = 'OBLIVI0N_DISPLAY_NAME_KEY';
+const ENCRYPTION_KEY = 'WYSPR_DISPLAY_NAME_KEY';
 
 // Generate or retrieve device-specific encryption key
 const getEncryptionKey = async (): Promise<string> => {
@@ -14,9 +14,9 @@ const getEncryptionKey = async (): Promise<string> => {
     }
     return key;
   } catch (error) {
-    console.error('[OBLIVI0N Encryption] Failed to get/set encryption key:', error);
+    console.error('[WYSPR Encryption] Failed to get/set encryption key:', error);
     // Fallback to a default key (not ideal for production)
-    return 'oblivi0n_fallback_key_' + Date.now();
+    return 'wyspr_fallback_key_' + Date.now();
   }
 };
 
@@ -50,7 +50,7 @@ const xorDecrypt = (encryptedText: string, key: string): string => {
     }
     return result;
   } catch (error) {
-    console.error('[OBLIVI0N Encryption] Failed to decrypt:', error);
+    console.error('[WYSPR Encryption] Failed to decrypt:', error);
     return '';
   }
 };
@@ -60,7 +60,7 @@ export const encryptData = async (data: string): Promise<string> => {
     const key = await getEncryptionKey();
     return xorEncrypt(data, key);
   } catch (error) {
-    console.error('[OBLIVI0N Encryption] Encryption failed:', error);
+    console.error('[WYSPR Encryption] Encryption failed:', error);
     return data; // Return original data if encryption fails
   }
 };
@@ -70,7 +70,7 @@ export const decryptData = async (cipherText: string): Promise<string> => {
     const key = await getEncryptionKey();
     return xorDecrypt(cipherText, key);
   } catch (error) {
-    console.error('[OBLIVI0N Encryption] Decryption failed:', error);
+    console.error('[WYSPR Encryption] Decryption failed:', error);
     return ''; // Return empty string if decryption fails
   }
 };

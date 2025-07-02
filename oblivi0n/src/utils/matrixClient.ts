@@ -2,8 +2,8 @@ import * as MatrixSDK from 'matrix-js-sdk';
 import * as SecureStore from 'expo-secure-store';
 import { Message } from '../types';
 
-const MATRIX_SESSIONS_KEY = 'oblivi0n_matrix_sessions';
-const ROOM_METADATA_KEY = 'oblivi0n_room_metadata';
+const MATRIX_SESSIONS_KEY = 'wyspr_matrix_sessions';
+const ROOM_METADATA_KEY = 'wyspr_room_metadata';
 
 export interface LoginResult {
   success: boolean;
@@ -23,8 +23,8 @@ export interface SessionData {
   serverPin: string;
 }
 
-export class OblivionMatrixClient {
-  private static instance: OblivionMatrixClient;
+export class WysprMatrixClient {
+  private static instance: WysprMatrixClient;
   private client: MatrixSDK.MatrixClient | null = null;
   private isTestMode = false;
   private testUserId: string | null = null;
@@ -32,11 +32,11 @@ export class OblivionMatrixClient {
 
   private constructor() {}
 
-  static getInstance(): OblivionMatrixClient {
-    if (!OblivionMatrixClient.instance) {
-      OblivionMatrixClient.instance = new OblivionMatrixClient();
+  static getInstance(): WysprMatrixClient {
+    if (!WysprMatrixClient.instance) {
+      WysprMatrixClient.instance = new WysprMatrixClient();
     }
-    return OblivionMatrixClient.instance;
+    return WysprMatrixClient.instance;
   }
 
   // Initialize client with existing session
@@ -71,9 +71,7 @@ export class OblivionMatrixClient {
     try {
       // This should be constructed from the new login form fields
       // For now, parsing existing userId format
-      const baseUrl = userId.includes('@') ? 
-        `https://matrix.${userId.split(':')[1]}` : 
-        'https://matrix.oblivi0n.zero';
+              const baseUrl = 'https://c69c-193-135-116-56.ngrok-free.app';
 
       const tempClient = MatrixSDK.createClient({ baseUrl });
       

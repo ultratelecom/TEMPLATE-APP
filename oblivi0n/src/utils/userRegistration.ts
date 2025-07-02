@@ -1,7 +1,7 @@
 import * as SecureStore from 'expo-secure-store';
 
-const REGISTERED_USERS_KEY = 'oblivi0n_registered_users';
-const CURRENT_USER_KEY = 'oblivi0n_current_user';
+const REGISTERED_USERS_KEY = 'wyspr_registered_users';
+const CURRENT_USER_KEY = 'wyspr_current_user';
 
 interface RegisteredUser {
   pin: string;
@@ -29,9 +29,9 @@ export class UserRegistrationService {
     try {
       await this.loadUserRegistry();
       await this.createTestUsers(); // Create some test users for demo
-      console.log('[OBLIVI0N Registration] Service initialized');
+      console.log('[WYSPR Registration] Service initialized');
     } catch (error) {
-      console.error('[OBLIVI0N Registration] Failed to initialize service:', error);
+      console.error('[WYSPR Registration] Failed to initialize service:', error);
     }
   }
 
@@ -42,7 +42,7 @@ export class UserRegistrationService {
         this.userRegistry = JSON.parse(stored);
       }
     } catch (error) {
-      console.error('[OBLIVI0N Registration] Failed to load user registry:', error);
+      console.error('[WYSPR Registration] Failed to load user registry:', error);
       this.userRegistry = {};
     }
   }
@@ -50,9 +50,9 @@ export class UserRegistrationService {
   private async saveUserRegistry(): Promise<void> {
     try {
       await SecureStore.setItemAsync(REGISTERED_USERS_KEY, JSON.stringify(this.userRegistry));
-      console.log('[OBLIVI0N Registration] User registry saved');
+      console.log('[WYSPR Registration] User registry saved');
     } catch (error) {
-      console.error('[OBLIVI0N Registration] Failed to save user registry:', error);
+      console.error('[WYSPR Registration] Failed to save user registry:', error);
     }
   }
 
@@ -87,7 +87,7 @@ export class UserRegistrationService {
 
     if (hasChanges) {
       await this.saveUserRegistry();
-      console.log('[OBLIVI0N Registration] Test users created');
+      console.log('[WYSPR Registration] Test users created');
     }
   }
 
@@ -139,10 +139,10 @@ export class UserRegistrationService {
       this.userRegistry[pin] = newUser;
       await this.saveUserRegistry();
 
-      console.log(`[OBLIVI0N Registration] User registered: ${pin} • ${username}`);
+      console.log(`[WYSPR Registration] User registered: ${pin} • ${username}`);
       return { success: true };
     } catch (error) {
-      console.error('[OBLIVI0N Registration] Registration failed:', error);
+      console.error('[WYSPR Registration] Registration failed:', error);
       return { success: false, error: 'Registration failed' };
     }
   }
@@ -172,7 +172,7 @@ export class UserRegistrationService {
         await this.saveUserRegistry();
       }
     } catch (error) {
-      console.error(`[OBLIVI0N Registration] Failed to update online status for ${pin}:`, error);
+      console.error(`[WYSPR Registration] Failed to update online status for ${pin}:`, error);
     }
   }
 
@@ -189,9 +189,9 @@ export class UserRegistrationService {
     try {
       this.userRegistry = {};
       await SecureStore.deleteItemAsync(REGISTERED_USERS_KEY);
-      console.log('[OBLIVI0N Registration] All users cleared');
+      console.log('[WYSPR Registration] All users cleared');
     } catch (error) {
-      console.error('[OBLIVI0N Registration] Failed to clear users:', error);
+      console.error('[WYSPR Registration] Failed to clear users:', error);
     }
   }
 

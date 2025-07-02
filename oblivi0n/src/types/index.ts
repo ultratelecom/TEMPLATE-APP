@@ -59,6 +59,7 @@ export type RootStackParamList = {
     groupAlias?: string;
   };
   AddContact: undefined;
+  ContactRequests: undefined;
   GroupCreation: undefined;
   Profile: {
     pin: string;

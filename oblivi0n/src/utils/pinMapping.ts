@@ -1,8 +1,8 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const PIN_MAPPING_KEY = 'oblivi0n_pin_mapping';
-const REMOTE_PIN_MAP_URL = 'https://secure-config.oblivi0n.gov.local/pinMap.json';
-const LAST_FETCH_KEY = 'oblivi0n_last_pin_fetch';
+const PIN_MAPPING_KEY = 'wyspr_pin_mapping';
+const REMOTE_PIN_MAP_URL = 'https://secure-config.wyspr.gov.local/pinMap.json';
+const LAST_FETCH_KEY = 'wyspr_last_pin_fetch';
 const FETCH_INTERVAL = 24 * 60 * 60 * 1000; // 24 hours
 
 export interface PinMapping {
@@ -24,7 +24,7 @@ export class PinMappingService {
 
   async loadMappings(): Promise<void> {
     try {
-      console.log('[OBLIVI0N PIN] Loading PIN mappings...');
+      console.log('[WYSPR PIN] Loading PIN mappings...');
       
       // Check if we need to fetch from remote
       const shouldFetchRemote = await this.shouldFetchRemoteMappings();
@@ -32,10 +32,10 @@ export class PinMappingService {
       if (shouldFetchRemote) {
         const remoteFetched = await this.fetchRemoteMappings();
         if (remoteFetched) {
-          console.log('[OBLIVI0N PIN] Remote mappings fetched successfully');
+          console.log('[WYSPR PIN] Remote mappings fetched successfully');
           await this.updateLastFetchTime();
         } else {
-          console.log('[OBLIVI0N PIN] Remote fetch failed, using local mappings');
+          console.log('[WYSPR PIN] Remote fetch failed, using local mappings');
         }
       }
       
@@ -43,13 +43,13 @@ export class PinMappingService {
       const stored = await AsyncStorage.getItem(PIN_MAPPING_KEY);
       if (stored) {
         this.mappings = JSON.parse(stored);
-        console.log('[OBLIVI0N PIN] Loaded', Object.keys(this.mappings).length, 'PIN mappings');
+        console.log('[WYSPR PIN] Loaded', Object.keys(this.mappings).length, 'PIN mappings');
       } else {
-        console.log('[OBLIVI0N PIN] No local mappings found');
+        console.log('[WYSPR PIN] No local mappings found');
         this.mappings = {};
       }
     } catch (error) {
-      console.error('[OBLIVI0N PIN] Failed to load PIN mappings:', error);
+      console.error('[WYSPR PIN] Failed to load PIN mappings:', error);
       this.mappings = {};
     }
   }
@@ -66,14 +66,14 @@ export class PinMappingService {
       
       return (now - lastFetchTime) > FETCH_INTERVAL;
     } catch (error) {
-      console.error('[OBLIVI0N PIN] Error checking fetch time:', error);
+      console.error('[WYSPR PIN] Error checking fetch time:', error);
       return true; // Default to fetching on error
     }
   }
 
   private async fetchRemoteMappings(): Promise<boolean> {
     try {
-      console.log('[OBLIVI0N PIN] Fetching remote PIN mappings from:', REMOTE_PIN_MAP_URL);
+      console.log('[WYSPR PIN] Fetching remote PIN mappings from:', REMOTE_PIN_MAP_URL);
       
       // Create a timeout promise
       const timeoutPromise = new Promise<never>((_, reject) => {
@@ -93,7 +93,7 @@ export class PinMappingService {
       ]);
       
       if (!response.ok) {
-        console.error('[OBLIVI0N PIN] Remote fetch failed with status:', response.status);
+        console.error('[WYSPR PIN] Remote fetch failed with status:', response.status);
         return false;
       }
       
@@ -101,7 +101,7 @@ export class PinMappingService {
       
       // Validate the remote data
       if (!this.validateMappings(remoteMappings)) {
-        console.error('[OBLIVI0N PIN] Remote mappings validation failed');
+        console.error('[WYSPR PIN] Remote mappings validation failed');
         return false;
       }
       
@@ -112,10 +112,10 @@ export class PinMappingService {
       // Save the merged mappings
       await AsyncStorage.setItem(PIN_MAPPING_KEY, JSON.stringify(mergedMappings));
       
-      console.log('[OBLIVI0N PIN] Remote mappings fetched and merged successfully');
+      console.log('[WYSPR PIN] Remote mappings fetched and merged successfully');
       return true;
     } catch (error) {
-      console.error('[OBLIVI0N PIN] Failed to fetch remote mappings:', error);
+      console.error('[WYSPR PIN] Failed to fetch remote mappings:', error);
       return false;
     }
   }
@@ -125,7 +125,7 @@ export class PinMappingService {
       const stored = await AsyncStorage.getItem(PIN_MAPPING_KEY);
       return stored ? JSON.parse(stored) : {};
     } catch (error) {
-      console.error('[OBLIVI0N PIN] Failed to get local mappings:', error);
+      console.error('[WYSPR PIN] Failed to get local mappings:', error);
       return {};
     }
   }
@@ -138,13 +138,13 @@ export class PinMappingService {
     for (const [pin, userId] of Object.entries(mappings)) {
       // Validate PIN format (2 digits)
       if (!/^\d{2}$/.test(pin)) {
-        console.error('[OBLIVI0N PIN] Invalid PIN format:', pin);
+        console.error('[WYSPR PIN] Invalid PIN format:', pin);
         return false;
       }
       
       // Validate Matrix User ID format
       if (typeof userId !== 'string' || !userId.startsWith('@') || !userId.includes(':')) {
-        console.error('[OBLIVI0N PIN] Invalid Matrix User ID:', userId);
+        console.error('[WYSPR PIN] Invalid Matrix User ID:', userId);
         return false;
       }
     }
@@ -156,7 +156,7 @@ export class PinMappingService {
     try {
       await AsyncStorage.setItem(LAST_FETCH_KEY, Date.now().toString());
     } catch (error) {
-      console.error('[OBLIVI0N PIN] Failed to update last fetch time:', error);
+      console.error('[WYSPR PIN] Failed to update last fetch time:', error);
     }
   }
 
@@ -187,9 +187,9 @@ export class PinMappingService {
   getMatrixUserId(pin: string): string | null {
     const userId = this.mappings[pin] || null;
     if (userId) {
-      console.log('[OBLIVI0N PIN] Resolved PIN', pin, 'to Matrix User ID:', userId);
+      console.log('[WYSPR PIN] Resolved PIN', pin, 'to Matrix User ID:', userId);
     } else {
-      console.warn('[OBLIVI0N PIN] No mapping found for PIN:', pin);
+      console.warn('[WYSPR PIN] No mapping found for PIN:', pin);
     }
     return userId;
   }
@@ -204,7 +204,7 @@ export class PinMappingService {
 
       // Check if mappings are loaded
       if (Object.keys(this.mappings).length === 0) {
-        console.log('[OBLIVI0N PIN] Mappings not loaded, attempting to load...');
+        console.log('[WYSPR PIN] Mappings not loaded, attempting to load...');
         await this.loadMappings();
       }
 
@@ -212,7 +212,7 @@ export class PinMappingService {
       
       if (!userId) {
         // Try to refresh mappings once more
-        console.log('[OBLIVI0N PIN] PIN not found, refreshing mappings...');
+        console.log('[WYSPR PIN] PIN not found, refreshing mappings...');
         await this.loadMappings();
         const retryUserId = this.getMatrixUserId(pin);
         
@@ -225,7 +225,7 @@ export class PinMappingService {
 
       return { userId };
     } catch (error) {
-      console.error('[OBLIVI0N PIN] Error resolving PIN to User ID:', error);
+      console.error('[WYSPR PIN] Error resolving PIN to User ID:', error);
       return { userId: null, error: 'Failed to resolve PIN' };
     }
   }

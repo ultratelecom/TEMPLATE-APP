@@ -1,21 +1,22 @@
 import * as SecureStore from 'expo-secure-store';
-import { OblivionMatrixClient } from './matrixClient';
+import { WysprMatrixClient } from './matrixClient';
 import { PinMappingService } from './pinMapping';
 import { NicknameService } from './nicknames';
+import { ContactRequestService } from './contactRequests';
 
-const AUTH_TOKEN_KEY = 'oblivi0n_secure_token';
-const USER_ID_KEY = 'oblivi0n_secure_user_id';
-const DEVICE_ID_KEY = 'oblivi0n_secure_device_id';
-const ACCESS_TOKEN_KEY = 'oblivi0n_secure_access_token';
-const SERVER_PIN_KEY = 'oblivi0n_secure_server_pin';
-const SESSION_TIMESTAMP_KEY = 'oblivi0n_session_timestamp';
+const AUTH_TOKEN_KEY = 'wyspr_secure_token';
+const USER_ID_KEY = 'wyspr_secure_user_id';
+const DEVICE_ID_KEY = 'wyspr_secure_device_id';
+const ACCESS_TOKEN_KEY = 'wyspr_secure_access_token';
+const SERVER_PIN_KEY = 'wyspr_secure_server_pin';
+const SESSION_TIMESTAMP_KEY = 'wyspr_session_timestamp';
 
 // Test mode configuration (dev only)
 const DEV_MODE = __DEV__;
 const TEST_PINS = {
-  '10': { userId: '@alice:matrix.oblivi0n.gov.local', pin: '1234' },
-  '11': { userId: '@bob:matrix.oblivi0n.gov.local', pin: '1234' },
-  '12': { userId: '@charlie:matrix.oblivi0n.gov.local', pin: '1234' },
+  '10': { userId: '@u32:193.135.116.56', pin: 'ultra12!' },
+  '11': { userId: '@u17:193.135.116.56', pin: 'test123!' },
+  '12': { userId: '@admin:193.135.116.56', pin: 'admin123!' },
 };
 
 export interface AuthState {
@@ -65,14 +66,14 @@ export class SecureAuthManager {
         const SESSION_EXPIRY = 30 * 24 * 60 * 60 * 1000;
         
         if (sessionAge < SESSION_EXPIRY) {
-          console.log('[OBLIVI0N Auth] Valid session found for user:', userId);
+          console.log('[WYSPR Auth] Valid session found for user:', userId);
           return {
             isLoggedIn: true,
             userId,
             sessionTimestamp: timestamp,
           };
         } else {
-          console.log('[OBLIVI0N Auth] Session expired, clearing stored data');
+          console.log('[WYSPR Auth] Session expired, clearing stored data');
           await this.clearSession();
         }
       }
@@ -83,7 +84,7 @@ export class SecureAuthManager {
         sessionTimestamp: null,
       };
     } catch (error) {
-      console.error('[OBLIVI0N Auth] Error checking stored session:', error);
+      console.error('[WYSPR Auth] Error checking stored session:', error);
       return {
         isLoggedIn: false,
         userId: null,
@@ -101,7 +102,7 @@ export class SecureAuthManager {
         return { success: false, error: 'No valid session found' };
       }
 
-      console.log('[OBLIVI0N Auth] Attempting auto-login');
+      console.log('[WYSPR Auth] Attempting auto-login');
       
       // Check if this is a test mode session
       const isTestSession = session.userId && Object.values(TEST_PINS).some(
@@ -109,10 +110,10 @@ export class SecureAuthManager {
       );
       
       if (DEV_MODE && isTestSession) {
-        console.log('[OBLIVI0N Auth] Test mode auto-login detected');
+        console.log('[WYSPR Auth] Test mode auto-login detected');
         
         // Enable test mode in Matrix client
-        const matrixClient = OblivionMatrixClient.getInstance();
+        const matrixClient = WysprMatrixClient.getInstance();
         await matrixClient.enableTestMode(session.userId!);
         
         // For test mode, just load the test PIN mappings
@@ -122,11 +123,21 @@ export class SecureAuthManager {
         const nicknameService = NicknameService.getInstance();
         await nicknameService.loadNicknames();
         
-        console.log('[OBLIVI0N Auth] Test mode auto-login successful');
+        // Register user's PIN for contact discovery
+        const contactService = ContactRequestService.getInstance();
+        const userPin = Object.keys(TEST_PINS).find(pin => TEST_PINS[pin as keyof typeof TEST_PINS].userId === session.userId);
+        if (userPin) {
+          await contactService.registerMyPin(userPin, session.userId!);
+        }
+        
+        // Create test contact requests for demo
+        await contactService.createTestContactRequests();
+        
+        console.log('[WYSPR Auth] Test mode auto-login successful');
         return { success: true, isTestMode: true };
       } else {
         // Regular auto-login with Matrix client
-        const matrixClient = OblivionMatrixClient.getInstance();
+        const matrixClient = WysprMatrixClient.getInstance();
         const initialized = await matrixClient.initializeClient();
         
         if (initialized) {
@@ -138,16 +149,16 @@ export class SecureAuthManager {
           const nicknameService = NicknameService.getInstance();
           await nicknameService.loadNicknames();
           
-          console.log('[OBLIVI0N Auth] Auto-login successful');
+          console.log('[WYSPR Auth] Auto-login successful');
           return { success: true };
         } else {
-          console.error('[OBLIVI0N Auth] Auto-login failed: Could not initialize client');
+          console.error('[WYSPR Auth] Auto-login failed: Could not initialize client');
           await this.clearSession();
           return { success: false, error: 'Session invalid' };
         }
       }
     } catch (error) {
-      console.error('[OBLIVI0N Auth] Auto-login error:', error);
+      console.error('[WYSPR Auth] Auto-login error:', error);
       await this.clearSession();
       return { success: false, error: 'Auto-login failed' };
     }
@@ -161,9 +172,9 @@ export class SecureAuthManager {
         return await this.handleTestLogin(pin);
       }
 
-      console.log('[OBLIVI0N Auth] Regular login attempt');
+      console.log('[WYSPR Auth] Regular login attempt');
       
-      const matrixClient = OblivionMatrixClient.getInstance();
+      const matrixClient = WysprMatrixClient.getInstance();
       const result = await matrixClient.login(userId, pin);
       
       if (result.success) {
@@ -178,13 +189,13 @@ export class SecureAuthManager {
         const nicknameService = NicknameService.getInstance();
         await nicknameService.loadNicknames();
         
-        console.log('[OBLIVI0N Auth] Login successful, session stored');
+        console.log('[WYSPR Auth] Login successful, session stored');
         return { success: true };
       } else {
         return { success: false, error: result.error };
       }
     } catch (error) {
-      console.error('[OBLIVI0N Auth] Login error:', error);
+      console.error('[WYSPR Auth] Login error:', error);
       return { success: false, error: 'Login failed' };
     }
   }
@@ -204,17 +215,17 @@ export class SecureAuthManager {
       return { success: false, error: 'Invalid test PIN' };
     }
 
-    console.log('[OBLIVI0N Auth] Test mode login for PIN:', pin);
+    console.log('[WYSPR Auth] Test mode login for PIN:', pin);
     
     try {
       // Mock the test login - don't actually connect to Matrix server
-      console.log('[OBLIVI0N Auth] Using offline test mode - no Matrix connection required');
+      console.log('[WYSPR Auth] Using offline test mode - no Matrix connection required');
       
       // Store mock session data
       await this.storeSession(testUser.userId);
       
       // Enable test mode in Matrix client
-      const matrixClient = OblivionMatrixClient.getInstance();
+      const matrixClient = WysprMatrixClient.getInstance();
       await matrixClient.enableTestMode(testUser.userId);
       
       // Create mock PIN mappings for test mode
@@ -224,11 +235,18 @@ export class SecureAuthManager {
       const nicknameService = NicknameService.getInstance();
       await nicknameService.loadNicknames();
       
-      console.log('[OBLIVI0N Auth] Test mode login successful (offline mode)');
+      // Register user's PIN for contact discovery
+      const contactService = ContactRequestService.getInstance();
+      await contactService.registerMyPin(pin, testUser.userId);
+      
+      // Create test contact requests for demo
+      await contactService.createTestContactRequests();
+      
+      console.log('[WYSPR Auth] Test mode login successful (offline mode)');
       return { success: true, isTestMode: true };
       
     } catch (error) {
-      console.error('[OBLIVI0N Auth] Test mode login error:', error);
+      console.error('[WYSPR Auth] Test mode login error:', error);
       return { success: false, error: 'Test login failed' };
     }
   }
@@ -238,12 +256,12 @@ export class SecureAuthManager {
     try {
       const pinService = PinMappingService.getInstance();
       
-      // Add some test contacts
-      await pinService.addMapping('20', '@contact1:matrix.oblivi0n.gov.local');
-      await pinService.addMapping('21', '@contact2:matrix.oblivi0n.gov.local'); 
-      await pinService.addMapping('22', '@contact3:matrix.oblivi0n.gov.local');
+              // Add some test contacts
+        await pinService.addMapping('20', '@contact1:193.135.116.56');
+        await pinService.addMapping('21', '@contact2:193.135.116.56'); 
+        await pinService.addMapping('22', '@contact3:193.135.116.56');
       
-      console.log('[OBLIVI0N Auth] Test PIN mappings created');
+      console.log('[WYSPR Auth] Test PIN mappings created');
       
       // Create some test nicknames
       const nicknameService = NicknameService.getInstance();
@@ -251,9 +269,9 @@ export class SecureAuthManager {
       await nicknameService.setNickname('21', 'AB'); // Alice Bob
       // Leave PIN 22 without a nickname to test both scenarios
       
-      console.log('[OBLIVI0N Auth] Test nicknames created');
+      console.log('[WYSPR Auth] Test nicknames created');
     } catch (error) {
-      console.error('[OBLIVI0N Auth] Failed to create test PIN mappings:', error);
+      console.error('[WYSPR Auth] Failed to create test PIN mappings:', error);
     }
   }
 
@@ -266,9 +284,9 @@ export class SecureAuthManager {
       await SecureStore.setItemAsync(SERVER_PIN_KEY, sessionData.serverPin);
       await SecureStore.setItemAsync(SESSION_TIMESTAMP_KEY, Date.now().toString());
       
-      console.log('[OBLIVI0N Auth] Session data saved securely');
+      console.log('[WYSPR Auth] Session data saved securely');
     } catch (error) {
-      console.error('[OBLIVI0N Auth] Failed to save session:', error);
+      console.error('[WYSPR Auth] Failed to save session:', error);
       throw error;
     }
   }
@@ -288,14 +306,14 @@ export class SecureAuthManager {
         if (sessionAge < SESSION_EXPIRY) {
           return { userId, deviceId, accessToken, serverPin };
         } else {
-          console.log('[OBLIVI0N Auth] Session expired, clearing stored data');
+          console.log('[WYSPR Auth] Session expired, clearing stored data');
           await this.clearSession();
         }
       }
 
       return null;
     } catch (error) {
-      console.error('[OBLIVI0N Auth] Failed to load session:', error);
+      console.error('[WYSPR Auth] Failed to load session:', error);
       return null;
     }
   }
@@ -308,9 +326,9 @@ export class SecureAuthManager {
       await SecureStore.deleteItemAsync(SERVER_PIN_KEY);
       await SecureStore.deleteItemAsync(SESSION_TIMESTAMP_KEY);
       
-      console.log('[OBLIVI0N Auth] Session data cleared');
+      console.log('[WYSPR Auth] Session data cleared');
     } catch (error) {
-      console.error('[OBLIVI0N Auth] Error clearing session:', error);
+      console.error('[WYSPR Auth] Error clearing session:', error);
     }
   }
 
@@ -322,9 +340,9 @@ export class SecureAuthManager {
       await SecureStore.setItemAsync(USER_ID_KEY, userId);
       await SecureStore.setItemAsync(SESSION_TIMESTAMP_KEY, timestamp);
       
-      console.log('[OBLIVI0N Auth] Session stored securely');
+      console.log('[WYSPR Auth] Session stored securely');
     } catch (error) {
-      console.error('[OBLIVI0N Auth] Failed to store session:', error);
+      console.error('[WYSPR Auth] Failed to store session:', error);
       throw error;
     }
   }
@@ -332,13 +350,13 @@ export class SecureAuthManager {
   // Clear session and logout
   async logout(): Promise<void> {
     try {
-      console.log('[OBLIVI0N Auth] Logging out and clearing session');
+      console.log('[WYSPR Auth] Logging out and clearing session');
       
-      const matrixClient = OblivionMatrixClient.getInstance();
+      const matrixClient = WysprMatrixClient.getInstance();
       
       // Handle test mode differently
       if (matrixClient.isInTestMode()) {
-        console.log('[OBLIVI0N Auth] Test mode logout - disabling test mode');
+        console.log('[WYSPR Auth] Test mode logout - disabling test mode');
         matrixClient.disableTestMode();
       } else {
         // Regular Matrix logout
@@ -356,9 +374,9 @@ export class SecureAuthManager {
       const nicknameService = NicknameService.getInstance();
       await nicknameService.clearAllNicknames();
       
-      console.log('[OBLIVI0N Auth] Logout complete');
+      console.log('[WYSPR Auth] Logout complete');
     } catch (error) {
-      console.error('[OBLIVI0N Auth] Logout error:', error);
+      console.error('[WYSPR Auth] Logout error:', error);
       // Still clear local session even if Matrix logout fails
       await this.clearSession();
     }

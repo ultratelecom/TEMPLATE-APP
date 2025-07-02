@@ -7,7 +7,7 @@ let BlurView: any;
 try {
   BlurView = require('@react-native-community/blur').BlurView;
 } catch (error) {
-  console.warn('[OBLIVI0N BlurOverlay] BlurView not available, using fallback');
+  console.warn('[WYSPR BlurOverlay] BlurView not available, using fallback');
   BlurView = null;
 }
 

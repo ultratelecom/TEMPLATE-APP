@@ -6,7 +6,7 @@ let ScreenshotDetector: any;
 try {
   ScreenshotDetector = require('react-native-screenshot-detector');
 } catch (error) {
-  console.warn('[OBLIVI0N Screenshot] Detector not available:', error);
+  console.warn('[WYSPR Screenshot] Detector not available:', error);
 }
 
 export interface ScreenshotEvent {
@@ -27,7 +27,7 @@ export class ScreenshotProtectionService {
 
   private constructor() {
     this.initializeProtection();
-    console.log('[OBLIVI0N Screenshot] Protection service initialized');
+    console.log('[WYSPR Screenshot] Protection service initialized');
   }
 
   static getInstance(): ScreenshotProtectionService {
@@ -45,9 +45,9 @@ export class ScreenshotProtectionService {
           this.handleScreenshotDetected();
         });
 
-        console.log('[OBLIVI0N Screenshot] Detection started');
+        console.log('[WYSPR Screenshot] Detection started');
       } else {
-        console.warn('[OBLIVI0N Screenshot] Native detection not available, using fallback');
+        console.warn('[WYSPR Screenshot] Native detection not available, using fallback');
         this.setupFallbackDetection();
       }
 
@@ -55,18 +55,18 @@ export class ScreenshotProtectionService {
       const subscription = AppState.addEventListener('change', this.handleAppStateChange);
       this.appStateSubscription = subscription;
     } catch (error) {
-      console.error('[OBLIVI0N Screenshot] Failed to initialize protection:', error);
+      console.error('[WYSPR Screenshot] Failed to initialize protection:', error);
       this.setupFallbackDetection();
     }
   }
 
   private setupFallbackDetection(): void {
     // Fallback: Blur on app state changes (when user might be taking screenshots)
-    console.log('[OBLIVI0N Screenshot] Using fallback detection method');
+    console.log('[WYSPR Screenshot] Using fallback detection method');
   }
 
   private handleScreenshotDetected = (): void => {
-    console.log('[OBLIVI0N Screenshot] Screenshot detected!');
+    console.log('[WYSPR Screenshot] Screenshot detected!');
 
     const event: ScreenshotEvent = {
       timestamp: new Date(),
@@ -88,7 +88,7 @@ export class ScreenshotProtectionService {
         try {
           callback(event);
         } catch (error) {
-          console.error('[OBLIVI0N Screenshot] Callback error:', error);
+          console.error('[WYSPR Screenshot] Callback error:', error);
         }
       });
 
@@ -98,7 +98,7 @@ export class ScreenshotProtectionService {
       }, 2000);
 
     } catch (error) {
-      console.error('[OBLIVI0N Screenshot] Failed to handle detection:', error);
+      console.error('[WYSPR Screenshot] Failed to handle detection:', error);
     }
   };
 
@@ -124,14 +124,14 @@ export class ScreenshotProtectionService {
   private activateBlur(): void {
     if (!this.isBlurred) {
       this.isBlurred = true;
-      console.log('[OBLIVI0N Screenshot] Blur activated');
+      console.log('[WYSPR Screenshot] Blur activated');
       
       // Notify all blur callbacks
       this.blurCallbacks.forEach(callback => {
         try {
           callback(true);
         } catch (error) {
-          console.error('[OBLIVI0N Screenshot] Blur callback error:', error);
+          console.error('[WYSPR Screenshot] Blur callback error:', error);
         }
       });
     }
@@ -140,14 +140,14 @@ export class ScreenshotProtectionService {
   private deactivateBlur(): void {
     if (this.isBlurred) {
       this.isBlurred = false;
-      console.log('[OBLIVI0N Screenshot] Blur deactivated');
+      console.log('[WYSPR Screenshot] Blur deactivated');
       
       // Notify all blur callbacks
       this.blurCallbacks.forEach(callback => {
         try {
           callback(false);
         } catch (error) {
-          console.error('[OBLIVI0N Screenshot] Blur callback error:', error);
+          console.error('[WYSPR Screenshot] Blur callback error:', error);
         }
       });
     }
@@ -225,9 +225,9 @@ export class ScreenshotProtectionService {
       this.currentRoomId = null;
       this.isBlurred = false;
       
-      console.log('[OBLIVI0N Screenshot] Protection service cleaned up');
+      console.log('[WYSPR Screenshot] Protection service cleaned up');
     } catch (error) {
-      console.error('[OBLIVI0N Screenshot] Cleanup error:', error);
+      console.error('[WYSPR Screenshot] Cleanup error:', error);
     }
   }
 }
@@ -253,7 +253,7 @@ export const useScreenshotProtection = (roomId?: string) => {
     // Subscribe to screenshot detection
     const unsubscribeDetection = service.onScreenshotDetected((event) => {
       setDetectionCount(prev => prev + 1);
-      console.log('[OBLIVI0N Screenshot] Hook detected screenshot:', event);
+      console.log('[WYSPR Screenshot] Hook detected screenshot:', event);
     });
 
     // Cleanup on unmount

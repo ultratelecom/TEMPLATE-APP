@@ -23,7 +23,7 @@ export class ReadReceiptService {
   private typingTimeouts: Map<string, NodeJS.Timeout> = new Map(); // userId -> timeout
 
   private constructor() {
-    console.log('[OBLIVI0N ReadReceipts] Service initialized (ephemeral mode)');
+    console.log('[WYSPR ReadReceipts] Service initialized (ephemeral mode)');
   }
 
   static getInstance(): ReadReceiptService {
@@ -61,7 +61,7 @@ export class ReadReceiptService {
         roomReceipts.push(receipt);
       }
 
-      console.log('[OBLIVI0N ReadReceipts] Message marked as read:', {
+      console.log('[WYSPR ReadReceipts] Message marked as read:', {
         messageId: messageId.substring(0, 8),
         roomId: roomId.substring(0, 8),
         userId: userId.substring(0, 8),
@@ -72,7 +72,7 @@ export class ReadReceiptService {
         roomReceipts.splice(0, roomReceipts.length - 100);
       }
     } catch (error) {
-      console.error('[OBLIVI0N ReadReceipts] Failed to mark message as read:', error);
+      console.error('[WYSPR ReadReceipts] Failed to mark message as read:', error);
     }
   }
 
@@ -129,13 +129,13 @@ export class ReadReceiptService {
 
       this.typingTimeouts.set(timeoutKey, timeout);
 
-      console.log('[OBLIVI0N ReadReceipts] Typing started:', {
+      console.log('[WYSPR ReadReceipts] Typing started:', {
         roomId: roomId.substring(0, 8),
         userPin: isGroup ? userPin : '[anonymous]',
         isGroup,
       });
     } catch (error) {
-      console.error('[OBLIVI0N ReadReceipts] Failed to set typing:', error);
+      console.error('[WYSPR ReadReceipts] Failed to set typing:', error);
     }
   }
 
@@ -159,13 +159,13 @@ export class ReadReceiptService {
         this.typingTimeouts.delete(timeoutKey);
       }
 
-      console.log('[OBLIVI0N ReadReceipts] Typing stopped:', {
+      console.log('[WYSPR ReadReceipts] Typing stopped:', {
         roomId: roomId.substring(0, 8),
         userPin: isGroup ? userPin : '[anonymous]',
         isGroup,
       });
     } catch (error) {
-      console.error('[OBLIVI0N ReadReceipts] Failed to stop typing:', error);
+      console.error('[WYSPR ReadReceipts] Failed to stop typing:', error);
     }
   }
 
@@ -220,7 +220,7 @@ export class ReadReceiptService {
       }
     }
 
-    console.log('[OBLIVI0N ReadReceipts] Cleared ephemeral data for room:', roomId.substring(0, 8));
+    console.log('[WYSPR ReadReceipts] Cleared ephemeral data for room:', roomId.substring(0, 8));
   }
 
   // Clear all data (logout)
@@ -234,7 +234,7 @@ export class ReadReceiptService {
     }
     this.typingTimeouts.clear();
 
-    console.log('[OBLIVI0N ReadReceipts] Cleared all ephemeral data');
+    console.log('[WYSPR ReadReceipts] Cleared all ephemeral data');
   }
 
   // Get statistics (for debugging)

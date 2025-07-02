@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const NICKNAMES_KEY = 'oblivi0n_local_nicknames';
+const NICKNAMES_KEY = 'wyspr_local_nicknames';
 
 export interface ContactNickname {
   pin: string;
@@ -39,11 +39,11 @@ export class NicknameService {
           return acc;
         }, {} as { [pin: string]: ContactNickname });
         
-        console.log('[OBLIVI0N Nicknames] Loaded', Object.keys(this.nicknames).length, 'nicknames');
+        console.log('[WYSPR Nicknames] Loaded', Object.keys(this.nicknames).length, 'nicknames');
       }
       this.isLoaded = true;
     } catch (error) {
-      console.error('[OBLIVI0N Nicknames] Failed to load nicknames:', error);
+      console.error('[WYSPR Nicknames] Failed to load nicknames:', error);
       this.nicknames = {};
       this.isLoaded = true;
     }
@@ -53,9 +53,9 @@ export class NicknameService {
   private async saveNicknames(): Promise<void> {
     try {
       await AsyncStorage.setItem(NICKNAMES_KEY, JSON.stringify(this.nicknames));
-      console.log('[OBLIVI0N Nicknames] Saved nicknames to storage');
+      console.log('[WYSPR Nicknames] Saved nicknames to storage');
     } catch (error) {
-      console.error('[OBLIVI0N Nicknames] Failed to save nicknames:', error);
+      console.error('[WYSPR Nicknames] Failed to save nicknames:', error);
     }
   }
 
@@ -92,10 +92,10 @@ export class NicknameService {
 
       await this.saveNicknames();
       
-      console.log('[OBLIVI0N Nicknames]', isUpdate ? 'Updated' : 'Set', 'nickname for PIN', pin, ':', nickname.toUpperCase());
+      console.log('[WYSPR Nicknames]', isUpdate ? 'Updated' : 'Set', 'nickname for PIN', pin, ':', nickname.toUpperCase());
       return { success: true };
     } catch (error) {
-      console.error('[OBLIVI0N Nicknames] Failed to set nickname:', error);
+      console.error('[WYSPR Nicknames] Failed to set nickname:', error);
       return { success: false, error: 'Failed to save nickname' };
     }
   }
@@ -103,7 +103,7 @@ export class NicknameService {
   // Get nickname for a PIN
   getNickname(pin: string): string | null {
     if (!this.isLoaded) {
-      console.warn('[OBLIVI0N Nicknames] Nicknames not loaded yet');
+      console.warn('[WYSPR Nicknames] Nicknames not loaded yet');
       return null;
     }
     return this.nicknames[pin]?.nickname || null;
@@ -119,17 +119,17 @@ export class NicknameService {
       if (this.nicknames[pin]) {
         delete this.nicknames[pin];
         await this.saveNicknames();
-        console.log('[OBLIVI0N Nicknames] Removed nickname for PIN:', pin);
+        console.log('[WYSPR Nicknames] Removed nickname for PIN:', pin);
       }
     } catch (error) {
-      console.error('[OBLIVI0N Nicknames] Failed to remove nickname:', error);
+      console.error('[WYSPR Nicknames] Failed to remove nickname:', error);
     }
   }
 
   // Get all nicknames
   getAllNicknames(): ContactNickname[] {
     if (!this.isLoaded) {
-      console.warn('[OBLIVI0N Nicknames] Nicknames not loaded yet');
+      console.warn('[WYSPR Nicknames] Nicknames not loaded yet');
       return [];
     }
     return Object.values(this.nicknames);
@@ -157,9 +157,9 @@ export class NicknameService {
     try {
       this.nicknames = {};
       await AsyncStorage.removeItem(NICKNAMES_KEY);
-      console.log('[OBLIVI0N Nicknames] Cleared all nicknames');
+      console.log('[WYSPR Nicknames] Cleared all nicknames');
     } catch (error) {
-      console.error('[OBLIVI0N Nicknames] Failed to clear nicknames:', error);
+      console.error('[WYSPR Nicknames] Failed to clear nicknames:', error);
     }
   }
 
