@@ -1,0 +1,29 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+1.	Always verify the app has actually booted.
+Never assume the app is running just because a boot command was issued. Open the app in a browser or emulator and check that it loads correctly, routes are working, and expected elements or data appear on screen. Only consider the app “booted” after real confirmation.
+	2.	Follow a structured development process for every task.
+For every change or feature:
+	•	Understand the full context of the app and any dependencies.
+	•	Write the code with clear inline comments.
+	•	Check for errors or oversights.
+	•	Test the change in a live environment.
+	•	Report what was tested and confirm it works as expected.
+	3.	Never skip verification after any change.
+Every update—no matter how small—must be tested in the app. Run the UI, endpoint, or function and confirm it behaves correctly. No task is “done” until this is complete.
+	4.	If the app fails to boot or behaves oddly, retry systematically.
+Try multiple recovery steps such as:
+	•	Restarting the dev server.
+	•	Clearing cache or node_modules.
+	•	Rebuilding dependencies.
+	•	Logging terminal output.
+Keep trying until the app boots properly, then verify its state.
+	5.	Watch for recurring boot errors and broken flows.
+If the app fails in a way that matches previous bugs (e.g. endless loading, blank screen), investigate that known issue first. Don’t repeat the same mistakes.
+	6.	Every new feature must have a visible or testable outcome.
+Add a UI element, console log, or response test that proves the feature works. Don’t count backend or frontend work as finished unless there’s proof it performs correctly in a real interaction.
+	7.	If something doesn’t show up after implementing it, assume it failed.
+Don’t pretend it’s working unless there’s visible or testable evidence. If it’s not there, retrace your steps, fix it, and test again.
